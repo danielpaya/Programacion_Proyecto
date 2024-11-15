@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-
+//KJKLJLKJ
 public class MedicinaGeneral extends JFrame {
     private JTextField idField, nombreField, apellidoField, documentoField, epsField;
     private JTextField frecuenciaField, sistolicaField, diastolicaField, temperaturaField, saturacionField;
