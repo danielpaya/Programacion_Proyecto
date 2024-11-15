@@ -3,7 +3,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-//777788888
+//777788888999
 public class Hospital {
     // Modelo de tabla compartido entre ORDEN y Historial
     private static DefaultTableModel historialModel = new DefaultTableModel(new String[]{"Nombre", "Examen", "Estado", "ID"}, 0);
