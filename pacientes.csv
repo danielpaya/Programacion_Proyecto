@@ -1,7 +1,0 @@
-ID,Nombre,Apellidos,Documento,EPS,Triage,Hospitalizado,DiasHospitalizacion
-1,Juan,Perez,123456,EPS1,2,False,0
-2,María,Gomez,789101,EPS2,1,True,3
-3,Carlos,Ramirez,112233,EPS3,3,False,0
-4,Lucia,Fernandez,445566,EPS1,1,True,2
-5,Ana,Lopez,778899,EPS2,4,False,0
-6,Miguel,Martinez,334455,EPS3,2,True,1
