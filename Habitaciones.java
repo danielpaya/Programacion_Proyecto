@@ -19,7 +19,6 @@ public class Habitaciones {
     String patologia = null;
     String salida = null;
     String tiempo = null;
-    String observaciones = null;
 
     // Constructor sin parámetros
     public Habitaciones() {
@@ -198,78 +197,45 @@ public class Habitaciones {
 
     }
     // Método para imprimir los datos finales
-    public String imprimirDatosFinales() {
-        return 
-            "Frecuencia Cardiaca Final: " + fcardiacaf + " lpm"+ "\n" +
-            "Frecuencia Respiratoria Final: " + frespiratoriaf + " rpm" + "\n" +
-            "Presión Final: " + presionf + " mmHg" + "\n" +
-            "Temperatura Final: " + temperaturaf + " °C" + "\n" +
-            "Saturación Final: " + saturacionf + " %" +"\n" +
-            "Última Revisión: " + ultrevision + "\n";
-    }
+public String imprimirDatosFinales() {
+    return 
+           "Frecuencia Cardiaca Final: " + fcardiacaf + " lpm"+ "\n" +
+           "Frecuencia Respiratoria Final: " + frespiratoriaf + " rpm" + "\n" +
+           "Presión Final: " + presionf + " mmHg" + "\n" +
+           "Temperatura Final: " + temperaturaf + " °C" + "\n" +
+           "Saturación Final: " + saturacionf + " %" +"\n" +
+           "Última Revisión: " + ultrevision + "\n";
+}
 
-    public void Vaciar() {
-        this.numhabitacion = null;
-        this.orden = null;
+    public void Vaciar(){
+        this.numhabitacion=null;
+        this.orden=null;
         this.ocupada = false;
         this.cedula = 0;
-        this.paciente = null;
+        this.paciente =null ;
         this.ingreso = null;
         this.fcardiacai = 0;
         this.frespiratoriai = 0;
         this.presioni = 0;
         this.temperaturai = 0;
         this.saturacioni = 0;
-        this.fcardiacaf = 0;
-        this.frespiratoriaf = 0;
-        this.presionf = 0;
-        this.temperaturaf = 0;
-        this.saturacionf = 0;
-        this.ultrevision = null;
         this.patologia = null;
-        this.salida = null;
-        this.tiempo = null;
-        this.observaciones = null;
+        
     }
-
     public void Llenar(String[] datos) {
-        if (datos.length >= 13) { // Asegúrate de que esta condición sea correcta
-            this.orden = datos[0];
-            this.cedula = Integer.parseInt(datos[1]);
-            this.paciente = datos[2];
-            this.patologia = datos[5];
-            this.fcardiacai = Double.parseDouble(datos[6]);
-            this.presioni = Double.parseDouble(datos[7]);
-            this.frespiratoriai = Double.parseDouble(datos[8]);
-            this.temperaturai = Double.parseDouble(datos[9]);
-            this.saturacioni = Double.parseDouble(datos[10]);
-            this.observaciones = datos[11];
-            this.tiempo = datos[12];
-        } else {
-            System.err.println("Error: Los datos no son suficientes para llenar la habitación.");
-        }
+        this.cedula = datos[1].isEmpty() ? null : Integer.parseInt(datos[1]);
+        this.paciente = datos[2].isEmpty() ? null : datos[2];
+        this.fcardiacai = datos[3].isEmpty() ? 0 : Double.parseDouble(datos[3]);
+        this.frespiratoriai = datos[4].isEmpty() ? 0 : Double.parseDouble(datos[4]);
+        this.presioni = datos[5].isEmpty() ? 0 : Double.parseDouble(datos[5]);
+        this.temperaturai = datos[6].isEmpty() ? 0 : Double.parseDouble(datos[6]);
+        this.saturacioni = datos[7].isEmpty() ? 0 : Double.parseDouble(datos[7]);
+        this.patologia = datos[8].isEmpty() ? null : datos[8];
+        this.fcardiacaf=fcardiacai;
+        this.frespiratoriaf=frespiratoriai;
+        this.presionf=presioni;
+        this.saturacionf=saturacioni;
+        this.ultrevision="Aun no se ha realizado una nueva revision";
+       
     }
-    
-
-    
-    
-
-    
-    
-
-
-    public String toCSV() {
-        return orden + "," +
-               cedula + "," +
-               paciente + "," +
-               fcardiacai + "," +
-               frespiratoriai + "," +
-               presioni + "," +
-               temperaturai + "," +
-               saturacioni + "," +
-               patologia + "," +
-               ultrevision + "," +
-               tiempo;
-    }    
 }
-

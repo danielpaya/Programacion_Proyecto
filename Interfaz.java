@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -23,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.time.Duration;
 
 public class Interfaz extends JFrame {
-    private final String CSV_HOSPITALIZACION = "pacientes_hospitalizacion.csv";
+    public static String entrada = "C:/PERSONAL/UNIVERSIDAD/SEGUNDO SEMESTRE/POO/TERCER CORTE/PROYECTO FINAL HOSPITALIZACION/PLANTILLA DATOS INICIALES PACIENTES.csv";
     public static String salida = "C:/PERSONAL/UNIVERSIDAD/SEGUNDO SEMESTRE/POO/TERCER CORTE/PROYECTO FINAL HOSPITALIZACION/INFORME DE PERSONAS HOSPITALIZADA.csv";
 
     public static void tiempohosp(Habitaciones habitacion) {    
@@ -52,42 +51,83 @@ public class Interfaz extends JFrame {
     }
 
     public static void actualizarCSVsalida(String archivo, Habitaciones habitacion) {
-        ArrayList<String> lineas = new ArrayList<>();
-        boolean ordenEncontrada = false;
+        if (habitacion.ocupada) {
+            ArrayList<String> lineas = new ArrayList<>();
+            boolean ordenEncontrada = false;
     
-        // Leer el contenido actual del archivo CSV
-        try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
-            String linea;
-            while ((linea = reader.readLine()) != null) {
-                String[] datos = linea.split(",");
-                if (datos.length > 0 && datos[0].equals(habitacion.orden)) {
-                    // Actualizar línea si la orden coincide
-                    linea = habitacion.toCSV();
-                    ordenEncontrada = true;
+            // Leer el contenido actual del archivo CSV
+            try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
+                String linea;
+                while ((linea = reader.readLine()) != null) {
+                    // Dividir la línea por ";" para verificar el atributo "orden"
+                    String[] datos = linea.split(";");
+                    if (datos.length > 18 && datos[18].equals(habitacion.orden)) {
+                        // Sobrescribir la línea si la orden coincide
+                        linea = habitacion.cedula + ";" +
+                                habitacion.paciente + ";" +
+                                habitacion.fcardiacai + ";" +
+                                habitacion.frespiratoriai + ";" +
+                                habitacion.presioni + ";" +
+                                habitacion.temperaturai + ";" +
+                                habitacion.saturacioni + ";" +
+                                habitacion.patologia + ";" +
+                                habitacion.fcardiacaf + ";" +
+                                habitacion.frespiratoriaf + ";" +
+                                habitacion.presionf + ";" +
+                                habitacion.temperaturaf + ";" +
+                                habitacion.saturacionf + ";" +
+                                habitacion.ingreso + ";" +
+                                habitacion.ultrevision + ";" +
+                                habitacion.salida + ";" +
+                                habitacion.tiempo + ";" +
+                                habitacion.numhabitacion + ";" +
+                                habitacion.orden;
+                        ordenEncontrada = true;
+                    }
+                    lineas.add(linea);
                 }
-                lineas.add(linea);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     
-        // Si no se encontró la orden, agregar una nueva línea
-        if (!ordenEncontrada) {
-            lineas.add(habitacion.toCSV());
-        }
-    
-        // Escribir el contenido actualizado en el archivo
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(archivo, false))) {
-            for (String linea : lineas) {
-                writer.write(linea);
-                writer.newLine();
+            // Si la orden no se encontró, agregar una nueva línea
+            if (!ordenEncontrada) {
+                lineas.add(
+                    habitacion.cedula + ";" +
+                    habitacion.paciente + ";" +
+                    habitacion.fcardiacai + ";" +
+                    habitacion.frespiratoriai + ";" +
+                    habitacion.presioni + ";" +
+                    habitacion.temperaturai + ";" +
+                    habitacion.saturacioni + ";" +
+                    habitacion.patologia + ";" +
+                    habitacion.fcardiacaf + ";" +
+                    habitacion.frespiratoriaf + ";" +
+                    habitacion.presionf + ";" +
+                    habitacion.temperaturaf + ";" +
+                    habitacion.saturacionf + ";" +
+                    habitacion.ingreso + ";" +
+                    habitacion.ultrevision + ";" +
+                    habitacion.salida + ";" +
+                    habitacion.tiempo + ";" +
+                    habitacion.numhabitacion + ";" +
+                    habitacion.orden
+                );
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+    
+            // Escribir el contenido actualizado de vuelta al archivo
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(archivo, false))) {
+                for (String linea : lineas) {
+                    writer.write(linea);
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
-    
-    
+       
+
     // Método para generar un valor aleatorio dentro de un rango dado
     public static double generarValor(double limiteInferior, double limiteSuperior) {
         // Generar el número aleatorio y redondearlo a dos decimales
@@ -122,62 +162,68 @@ public class Interfaz extends JFrame {
     public boolean buscarOrdenEnCSV(String ordenBuscada, String rutaArchivo) {
         try (BufferedReader reader = new BufferedReader(new FileReader(rutaArchivo))) {
             String linea;
-            boolean isFirstLine = true; // Skip headers
+            boolean isFirstLine = true; // Ignorar encabezados
+
             while ((linea = reader.readLine()) != null) {
                 if (isFirstLine) {
                     isFirstLine = false;
                     continue;
                 }
-                // Split columns by comma since this file uses commas as delimiters
-                String[] columnas = linea.split(",");
-                if (columnas.length > 1 && columnas[0].trim().equals(ordenBuscada.trim())) { // Match by ID
-                    return true;
+
+                // Separar columnas por delimitador punto y coma
+                String[] columnas = linea.split(";");
+
+                // Comparar valor de "orden" en la primera columna
+                if (columnas[0].trim().equals(ordenBuscada.trim())) {
+                    return true; // Devuelve los datos de la línea
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return false;
+
+        return false; // Si no se encuentra la orden, devuelve null
     }
-    
 
-    public static void Cambiarorden(String archivoCsv, String valorOrden, String caracterAgregar) throws IOException {
-        // Leer todas las líneas del archivo CSV usando una codificación explícita
-        ArrayList<String> lineas = new ArrayList<>(Files.readAllLines(Paths.get(archivoCsv), Charset.forName("ISO-8859-1")));
+ public static void Cambiarorden(String archivoCsv, String valorOrden, String caracterAgregar) throws IOException {
+    // Leer todas las líneas del archivo CSV usando una codificación explícita
+    ArrayList<String> lineas = new ArrayList<>(Files.readAllLines(Paths.get(archivoCsv), Charset.forName("ISO-8859-1")));
 
-        // Crear una lista para almacenar las líneas modificadas
-        ArrayList<String> lineasActualizadas = new ArrayList<>();
+    // Crear una lista para almacenar las líneas modificadas
+    ArrayList<String> lineasActualizadas = new ArrayList<>();
 
-        // Iterar por cada línea del CSV
-        for (String linea : lineas) {
-            // Validar si la línea no está vacía antes de dividirla
-            if (linea.trim().isEmpty()) {
-                lineasActualizadas.add(linea); // Mantener líneas vacías sin cambios
-                continue;
-            }
-
-            // Dividir la línea en columnas usando el punto y coma como delimitador
-            String[] columnas = linea.split(";");
-
-            // Verificar si la columna que contiene la orden (por ejemplo, la segunda columna) es igual al valor que buscamos
-            if (columnas.length > 1 && columnas[0].trim().equals(valorOrden.trim())) {
-                // Modificar el valor de la orden, agregando el carácter al número de la orden
-                columnas[0] = columnas[0] + caracterAgregar; // Agregar el carácter (por ejemplo, 'u')
-            }
-
-            // Volver a juntar las columnas modificadas usando punto y coma como delimitador
-            lineasActualizadas.add(String.join(";", columnas));
+    // Iterar por cada línea del CSV
+    for (String linea : lineas) {
+        // Validar si la línea no está vacía antes de dividirla
+        if (linea.trim().isEmpty()) {
+            lineasActualizadas.add(linea); // Mantener líneas vacías sin cambios
+            continue;
         }
 
-        // Sobrescribir el archivo original con las líneas actualizadas usando la misma codificación
-        Files.write(Paths.get(archivoCsv), lineasActualizadas, Charset.forName("ISO-8859-1"));
+        // Dividir la línea en columnas usando el punto y coma como delimitador
+        String[] columnas = linea.split(";");
+
+        // Verificar si la columna que contiene la orden (por ejemplo, la segunda columna) es igual al valor que buscamos
+        if (columnas.length > 1 && columnas[0].trim().equals(valorOrden.trim())) {
+            // Modificar el valor de la orden, agregando el carácter al número de la orden
+            columnas[0] = columnas[0] + caracterAgregar; // Agregar el carácter (por ejemplo, 'u')
+        }
+
+        // Volver a juntar las columnas modificadas usando punto y coma como delimitador
+        lineasActualizadas.add(String.join(";", columnas));
     }
+
+    // Sobrescribir el archivo original con las líneas actualizadas usando la misma codificación
+    Files.write(Paths.get(archivoCsv), lineasActualizadas, Charset.forName("ISO-8859-1"));
+}
 
     private Map<String, String> ordenesAsignadas = new HashMap<>();
 
     private void actualizarEstadoHabitacion(String numhabitacion, String orden, JButton boton, Habitaciones habitacion) {
+        // Obtener la ventana contenedora del botón
         Window ventanaActual = SwingUtilities.getWindowAncestor(boton);
-    
+
+        // Verificar si la orden ya está asociada a una habitación diferente
         if (ordenesAsignadas.containsKey(orden)) {
             String habitacionAsociada = ordenesAsignadas.get(orden);
             if (!habitacionAsociada.equals(numhabitacion)) {
@@ -186,15 +232,28 @@ public class Interfaz extends JFrame {
                 return;
             }
         }
-    
+
         if (!habitacion.ocupada) {
+            // Leer el archivo CSV para buscar la orden
+            String rutaArchivo =entrada;
             String[] datosOrden = null;
-    
-            try (BufferedReader reader = new BufferedReader(new FileReader(CSV_HOSPITALIZACION))) {
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(rutaArchivo))) {
                 String linea;
+                boolean isFirstLine = true; // Ignorar encabezados
+
                 while ((linea = reader.readLine()) != null) {
+                    if (isFirstLine) {
+                        isFirstLine = false;
+                        continue;
+                    }
+
+                    // Separar columnas por delimitador punto y coma
                     String[] columnas = linea.split(";");
                     if (columnas[0].trim().equals(orden.trim())) {
+                        for (int i = 0; i < columnas.length; i++) {
+                            columnas[i] = columnas[i].replace(",", "."); // Reemplazar comas por puntos
+                        }
                         datosOrden = columnas;
                         break;
                     }
@@ -204,25 +263,29 @@ public class Interfaz extends JFrame {
                 e.printStackTrace();
                 return;
             }
-    
+
             if (datosOrden != null) {
                 habitacion.Llenar(datosOrden);
                 habitacion.numhabitacion = numhabitacion;
+
+                // Registrar la orden asociada a esta habitación
                 ordenesAsignadas.put(orden, numhabitacion);
-    
+
+                // Cambiar el estado y mostrar éxito
                 boton.setBackground(Color.RED);
                 JOptionPane.showMessageDialog(ventanaActual, "HOSPITALIZACIÓN EXITOSA");
                 habitacion.ocupada = true;
                 habitacion.orden = orden;
-    
+
+                // Registrar fecha de ingreso
                 LocalDateTime fechaActual = LocalDateTime.now();
                 DateTimeFormatter formato = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 String fechaHora = fechaActual.format(formato);
                 habitacion.setIngreso(fechaHora);
-    
-                // Actualizar CSV y registrar en historial clínico
-                actualizarCSVsalida(CSV_HOSPITALIZACION, habitacion);
-                agregarAHistorialClinico(habitacion);
+                actualizarCSVsalida(salida, habitacion);
+                if (ventanaActual != null) {
+                    ventanaActual.dispose();
+                }
             } else {
                 JOptionPane.showMessageDialog(ventanaActual, "Orden no encontrada en el archivo.");
             }
@@ -232,27 +295,40 @@ public class Interfaz extends JFrame {
                     ventanaActual, "¿Está seguro de realizar la salida?", 
                     "Confirmar salida", JOptionPane.YES_NO_OPTION
                 );
-    
+
                 if (option == JOptionPane.YES_OPTION) {
                     boton.setBackground(Color.GREEN);
                     JOptionPane.showMessageDialog(ventanaActual, "SALIDA EXITOSA");
-    
+
+                    // Liberar habitación
+                    
+
+                    try {
+                        Cambiarorden(entrada, orden, "usada");
+                    } catch (IOException e) {
+                        JOptionPane.showMessageDialog(ventanaActual, 
+                            "Error al actualizar la orden en el archivo: " + e.getMessage());
+                        e.printStackTrace();
+                        return;
+                    }
+
+                    // Registrar fecha de salida
                     LocalDateTime fechaActual = LocalDateTime.now();
                     DateTimeFormatter formato = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                     String fechaHora = fechaActual.format(formato);
                     habitacion.setSalida(fechaHora);
-    
                     tiempohosp(habitacion);
-    
-                    // Actualizar historial clínico con el alta
-                    agregarAHistorialClinicoConAlta(habitacion);
-    
-                    // Eliminar paciente del CSV
-                    eliminarPacienteDelCSV(habitacion.orden);
-    
+                    actualizarCSVsalida(salida, habitacion);
                     habitacion.Vaciar();
                     habitacion.ocupada = false;
+                    // Eliminar la asociación de la orden
                     ordenesAsignadas.remove(orden);
+
+                    if (ventanaActual != null) {
+                        ventanaActual.dispose();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(ventanaActual, "Operación cancelada.");
                 }
             } else {
                 JOptionPane.showMessageDialog(ventanaActual, 
@@ -260,30 +336,11 @@ public class Interfaz extends JFrame {
             }
         }
     }
+
+
     
-    private void eliminarPacienteDelCSV(String orden) {
-        ArrayList<String> lineas = new ArrayList<>();
     
-        try (BufferedReader reader = new BufferedReader(new FileReader(CSV_HOSPITALIZACION))) {
-            String linea;
-            while ((linea = reader.readLine()) != null) {
-                if (!linea.contains(orden)) {
-                    lineas.add(linea);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_HOSPITALIZACION, false))) {
-            for (String linea : lineas) {
-                writer.write(linea);
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void Colorhabitacion(JButton boton, Habitaciones habitacion) {
         // Cambiar el color del botón y mostrar mensaje según el estado de 'ocupada'
@@ -295,51 +352,43 @@ public class Interfaz extends JFrame {
         }
     }
     private void Mostrarhabitacion(JButton boton, Habitaciones habitacion) {
-    // Crear un área de texto para mostrar el mensaje en la ventana
-    JTextArea areaTexto = new JTextArea(15, 50);
-    areaTexto.setEditable(false); // Hacer que el área de texto sea solo de lectura
-
-    // Cambiar el contenido según el estado de la habitación
-    if (habitacion.ocupada) {
-        StringBuilder contenido = new StringBuilder();
-        contenido.append("*********************Datos Iniciales*********************\n");
-        contenido.append(habitacion.imprimirDatos());
-        contenido.append("\n\n");
-        contenido.append("*********************Datos Finales*********************\n");
-        contenido.append(habitacion.imprimirDatosFinales());
-        areaTexto.setText(contenido.toString());
-    } else {
-        areaTexto.setText("La habitación está vacía.");
+        // Crear un área de texto para mostrar el mensaje en la ventana
+        JTextArea areaTexto = new JTextArea(15, 50);
+        areaTexto.setEditable(false); // Hacer que el área de texto sea solo de lectura
+    
+        // Cambiar el contenido según el estado de la habitación
+        if (habitacion.ocupada) {
+            // Crear un StringBuilder para concatenar los datos en un formato ordenado
+            StringBuilder contenido = new StringBuilder();
+    
+            // Agregar los datos iniciales con formato de dos columnas
+            contenido.append("*********************Datos Iniciales*********************\n");
+            contenido.append(habitacion.imprimirDatos());
+            
+            contenido.append("\n\n");  // Separación entre los datos iniciales y finales
+    
+            // Agregar los datos finales con formato de dos columnas
+            contenido.append("*********************Datos Finales*********************\n");
+            contenido.append(habitacion.imprimirDatosFinales());
+    
+            // Asignar el contenido generado al área de texto
+            areaTexto.setText(contenido.toString());
+        } else {
+            // Mensaje para habitación vacía
+            areaTexto.setText("La habitación está vacía.");
+        }
+    
+        // Mostrar la ventana con el área de texto
+        JOptionPane.showMessageDialog(
+            null, 
+            new JScrollPane(areaTexto), 
+            "INFORMACIÓN DE LA HABITACIÓN", 
+            JOptionPane.INFORMATION_MESSAGE
+        );
     }
-
-    // Crear un panel para los botones
-    JPanel buttonPanel = new JPanel();
-    buttonPanel.setLayout(new FlowLayout());
-
-    // Botón Aceptar
-    JButton aceptarButton = new JButton("Aceptar");
-    aceptarButton.addActionListener(e -> {
-        JOptionPane.showMessageDialog(null, "Información cerrada.");
-    });
-
-    // Botón Actualizar Historial Clínico
-    JButton actualizarHistorialButton = new JButton("Actualizar Historial Clínico");
-    actualizarHistorialButton.addActionListener(e -> {
-        agregarAHistorialClinico(habitacion); // Llama al método para actualizar el historial
-    });
-
-    // Agregar los botones al panel
-    buttonPanel.add(aceptarButton);
-    buttonPanel.add(actualizarHistorialButton);
-
-    // Mostrar la ventana con el área de texto y los botones
-    JPanel mainPanel = new JPanel(new BorderLayout());
-    mainPanel.add(new JScrollPane(areaTexto), BorderLayout.CENTER);
-    mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-    JOptionPane.showMessageDialog(null, mainPanel, "INFORMACIÓN DE LA HABITACIÓN", JOptionPane.INFORMATION_MESSAGE);
-}
-
+    
+    
+    
     public Interfaz() {
         
         Habitaciones habitacion1 = new Habitaciones();
@@ -416,7 +465,7 @@ public class Interfaz extends JFrame {
                     String input = textField.getText();
 
                     // Validar que la entrada sea solo números y no más de 10 dígitos
-                    if (input.matches("\\d{1,10}") && buscarOrdenEnCSV(input, CSV_HOSPITALIZACION)==true){ // Lógica si la entrada es válida y se encuentra en el archivo
+                    if (input.matches("\\d{1,10}") && buscarOrdenEnCSV(input, entrada)==true){ // Lógica si la entrada es válida y se encuentra en el archivo
                         // Crear una nueva ventana con el logo si la validación es exitosa
                         JOptionPane.showMessageDialog(null, "Ey parcero si tiene una orden bien pueda siga elija salita");
                         JFrame newWindow = new JFrame("HABITACIONES");
@@ -758,37 +807,6 @@ public class Interfaz extends JFrame {
         // Agregar el panel principal a la ventana
         add(mainPanel);
     }
-// Metodo para actualizar el historial clinico del paciente
-private void agregarAHistorialClinico(Habitaciones habitacion) {
-    String archivoHistorial = habitacion.cedula + "_historial.csv";
-    File file = new File(archivoHistorial);
-
-    try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-        if (!file.exists() || file.length() == 0) {
-            writer.write("Fecha/Hora\tLugar\tObservaciones\n"); // Encabezado
-        }
-
-        String fechaHora = habitacion.ingreso;
-        writer.write(fechaHora + "\tHospitalización\tIngreso a habitación: " + habitacion.numhabitacion + "\n");
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-}
-
-
-    // Metodo para que automaticamente se ponga en el historial del paciente que se le dio de alta
-    private void agregarAHistorialClinicoConAlta(Habitaciones habitacion) {
-        String archivoHistorial = habitacion.cedula + "_historial.csv";
-    
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(archivoHistorial, true))) {
-            String fechaHora = habitacion.salida;
-            writer.write(fechaHora + "\tHospitalización\tAlta de habitación: " + habitacion.numhabitacion + "\n");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
