@@ -587,166 +587,170 @@ public class MedicinaGeneral extends JFrame {
 
 
 // Ventana para Historial Clínico
-    private void mostrarVentanaHistorialClinico() {
-        // Verificar si hay un paciente seleccionado
-        String documento = documentoField.getText();
-        String nombre = nombreField.getText();
-        String apellido = apellidoField.getText();
+private void mostrarVentanaHistorialClinico() {
+    // Verificar si hay un paciente seleccionado
+    String documento = documentoField.getText();
+    String nombre = nombreField.getText();
+    String apellido = apellidoField.getText();
 
-        if (documento.isEmpty() || nombre.isEmpty() || apellido.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Por favor, selecciona un paciente para ver o actualizar su historial clínico.");
-            return;
-        }
-
-        // Archivo del historial clínico del paciente
-        File historialFile = new File(documento + "_historial.csv");
-
-        if (!historialFile.exists()) {
-            // Caso 1: No existe historial clínico, se muestra la ventana para crear uno nuevo
-            JDialog dialog = new JDialog(this, "Crear Historial Clínico", true);
-            dialog.setSize(400, 300);
-            dialog.setLayout(new GridLayout(5, 2));
-
-            dialog.add(new JLabel("Documento paciente:"));
-            JTextField documentoFieldDialog = new JTextField(documento);
-            documentoFieldDialog.setEditable(false);
-            dialog.add(documentoFieldDialog);
-
-            dialog.add(new JLabel("Nombre:"));
-            JTextField nombreFieldDialog = new JTextField(nombre);
-            nombreFieldDialog.setEditable(false);
-            dialog.add(nombreFieldDialog);
-
-            dialog.add(new JLabel("Apellido:"));
-            JTextField apellidoFieldDialog = new JTextField(apellido);
-            apellidoFieldDialog.setEditable(false);
-            dialog.add(apellidoFieldDialog);
-
-            dialog.add(new JLabel("Observaciones:"));
-            JTextArea observacionesAreaDialog = new JTextArea();
-            JScrollPane observacionesScroll = new JScrollPane(observacionesAreaDialog);
-            dialog.add(observacionesScroll);
-
-            JButton crearButton = new JButton("Crear Historial");
-            JButton cancelarButton = new JButton("Cancelar");
-
-            crearButton.addActionListener(e -> {
-                try (FileWriter writer = new FileWriter(historialFile, true)) {
-                    String fechaHora = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-                    String lugar = "Medicina General"; // Lugar de atención definido estáticamente
-                    String observaciones = observacionesAreaDialog.getText().replace("\n", " ").replace("\r", " ");
-
-                    // Escribir al CSV usando un separador de tabulación (\t) en lugar de comas
-                    writer.write("Fecha/Hora\tLugar\tObservaciones\n"); // Encabezado
-                    writer.write(fechaHora + "\t" + lugar + "\t" + observaciones + "\n");
-
-                    JOptionPane.showMessageDialog(this, "Historial clínico creado correctamente.");
-                    dialog.dispose();
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(this, "Error al crear el historial clínico: " + ex.getMessage());
-                }
-            });
-
-            cancelarButton.addActionListener(e -> dialog.dispose());
-
-            dialog.add(crearButton);
-            dialog.add(cancelarButton);
-
-            dialog.setLocationRelativeTo(this);
-            dialog.setVisible(true);
-        } else {
-            // Caso 2: Ya existe historial clínico, se muestra la ventana para actualizar o ver historial
-            JDialog dialog = new JDialog(this, "Actualizar o Ver Historial Clínico", true);
-            dialog.setSize(400, 300);
-            dialog.setLayout(new GridLayout(6, 2));
-
-            dialog.add(new JLabel("Documento paciente:"));
-            JTextField documentoFieldDialog = new JTextField(documento);
-            documentoFieldDialog.setEditable(false);
-            dialog.add(documentoFieldDialog);
-
-            dialog.add(new JLabel("Nombre:"));
-            JTextField nombreFieldDialog = new JTextField(nombre);
-            nombreFieldDialog.setEditable(false);
-            dialog.add(nombreFieldDialog);
-
-            dialog.add(new JLabel("Apellido:"));
-            JTextField apellidoFieldDialog = new JTextField(apellido);
-            apellidoFieldDialog.setEditable(false);
-            dialog.add(apellidoFieldDialog);
-
-            dialog.add(new JLabel("Observaciones:"));
-            JTextArea observacionesAreaDialog = new JTextArea();
-            JScrollPane observacionesScroll = new JScrollPane(observacionesAreaDialog);
-            dialog.add(observacionesScroll);
-
-            JButton actualizarButton = new JButton("Actualizar Historial");
-            JButton verHistorialButton = new JButton("Ver Historial Clínico");
-            JButton cancelarButton = new JButton("Cancelar");
-
-            actualizarButton.addActionListener(e -> {
-                try (FileWriter writer = new FileWriter(historialFile, true)) {
-                    String fechaHora = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-                    String lugar = "Medicina General"; // Lugar de atención definido estáticamente
-                    String observaciones = observacionesAreaDialog.getText().replace("\n", " ").replace("\r", " ");
-
-                    // Agregar nueva entrada al historial
-                    writer.write(fechaHora + "\t" + lugar + "\t" + observaciones + "\n");
-
-                    JOptionPane.showMessageDialog(this, "Historial clínico actualizado correctamente.");
-                    dialog.dispose();
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(this, "Error al actualizar el historial clínico: " + ex.getMessage());
-                }
-            });
-
-            verHistorialButton.addActionListener(e -> {
-                // Mostrar historial clínico en una tabla
-                JDialog verDialog = new JDialog(dialog, "Historial Clínico del Paciente", true);
-                verDialog.setSize(600, 400);
-                verDialog.setLayout(new BorderLayout());
-
-                // Modelo y tabla para mostrar el historial
-                DefaultTableModel historialTableModel = new DefaultTableModel(new String[]{"Fecha/Hora", "Lugar", "Observaciones"}, 0);
-                JTable historialTable = new JTable(historialTableModel);
-
-                try (BufferedReader reader = new BufferedReader(new FileReader(historialFile))) {
-                    String line;
-                    boolean isFirstLine = true; // Saltar encabezado
-                    while ((line = reader.readLine()) != null) {
-                        if (isFirstLine) {
-                            isFirstLine = false;
-                            continue;
-                        }
-                        String[] datos = line.split("\t");
-                        if (datos.length >= 3) {
-                            historialTableModel.addRow(datos);
-                        }
-                    }
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(this, "Error al leer el historial clínico: " + ex.getMessage());
-                }
-
-                verDialog.add(new JScrollPane(historialTable), BorderLayout.CENTER);
-
-                JButton cerrarButton = new JButton("Cerrar");
-                cerrarButton.addActionListener(event -> verDialog.dispose());
-                verDialog.add(cerrarButton, BorderLayout.SOUTH);
-
-                verDialog.setLocationRelativeTo(dialog);
-                verDialog.setVisible(true);
-            });
-
-            cancelarButton.addActionListener(e -> dialog.dispose());
-
-            dialog.add(actualizarButton);
-            dialog.add(verHistorialButton);
-            dialog.add(cancelarButton);
-
-            dialog.setLocationRelativeTo(this);
-            dialog.setVisible(true);
-        }
+    if (documento.isEmpty() || nombre.isEmpty() || apellido.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Por favor, selecciona un paciente para ver o actualizar su historial clínico.");
+        return;
     }
+
+    // Archivo del historial clínico del paciente
+    File historialFile = new File(documento + "_historial.csv");
+
+    if (!historialFile.exists()) {
+        // Caso 1: No existe historial clínico, se muestra la ventana para crear uno nuevo
+        JDialog dialog = new JDialog(this, "Crear Historial Clínico", true);
+        dialog.setSize(400, 300);
+        dialog.setLayout(new GridLayout(5, 2));
+
+        dialog.add(new JLabel("Documento paciente:"));
+        JTextField documentoFieldDialog = new JTextField(documento);
+        documentoFieldDialog.setEditable(false);
+        dialog.add(documentoFieldDialog);
+
+        dialog.add(new JLabel("Nombre:"));
+        JTextField nombreFieldDialog = new JTextField(nombre);
+        nombreFieldDialog.setEditable(false);
+        dialog.add(nombreFieldDialog);
+
+        dialog.add(new JLabel("Apellido:"));
+        JTextField apellidoFieldDialog = new JTextField(apellido);
+        apellidoFieldDialog.setEditable(false);
+        dialog.add(apellidoFieldDialog);
+
+        dialog.add(new JLabel("Observaciones:"));
+        JTextArea observacionesAreaDialog = new JTextArea();
+        JScrollPane observacionesScroll = new JScrollPane(observacionesAreaDialog);
+        dialog.add(observacionesScroll);
+
+        JButton crearButton = new JButton("Crear Historial");
+        JButton cancelarButton = new JButton("Cancelar");
+
+        crearButton.addActionListener(e -> {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(historialFile, true))) {
+                String fechaHora = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+                String lugar = "Medicina General"; // Lugar de atención definido estáticamente
+                String observaciones = observacionesAreaDialog.getText().replace("\n", " ").replace("\r", " ");
+
+                // Escribir encabezado si es un archivo nuevo
+                if (historialFile.length() == 0) {
+                    writer.write("Fecha/Hora,Lugar,Observaciones\n");
+                }
+                // Escribir la nueva entrada
+                writer.write(fechaHora + "," + lugar + "," + observaciones + "\n");
+
+                JOptionPane.showMessageDialog(this, "Historial clínico creado correctamente.");
+                dialog.dispose();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error al crear el historial clínico: " + ex.getMessage());
+            }
+        });
+
+        cancelarButton.addActionListener(e -> dialog.dispose());
+
+        dialog.add(crearButton);
+        dialog.add(cancelarButton);
+
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    } else {
+        // Caso 2: Ya existe historial clínico, se muestra la ventana para actualizar o ver historial
+        JDialog dialog = new JDialog(this, "Actualizar o Ver Historial Clínico", true);
+        dialog.setSize(400, 300);
+        dialog.setLayout(new GridLayout(6, 2));
+
+        dialog.add(new JLabel("Documento paciente:"));
+        JTextField documentoFieldDialog = new JTextField(documento);
+        documentoFieldDialog.setEditable(false);
+        dialog.add(documentoFieldDialog);
+
+        dialog.add(new JLabel("Nombre:"));
+        JTextField nombreFieldDialog = new JTextField(nombre);
+        nombreFieldDialog.setEditable(false);
+        dialog.add(nombreFieldDialog);
+
+        dialog.add(new JLabel("Apellido:"));
+        JTextField apellidoFieldDialog = new JTextField(apellido);
+        apellidoFieldDialog.setEditable(false);
+        dialog.add(apellidoFieldDialog);
+
+        dialog.add(new JLabel("Observaciones:"));
+        JTextArea observacionesAreaDialog = new JTextArea();
+        JScrollPane observacionesScroll = new JScrollPane(observacionesAreaDialog);
+        dialog.add(observacionesScroll);
+
+        JButton actualizarButton = new JButton("Actualizar Historial");
+        JButton verHistorialButton = new JButton("Ver Historial Clínico");
+        JButton cancelarButton = new JButton("Cancelar");
+
+        actualizarButton.addActionListener(e -> {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(historialFile, true))) {
+                String fechaHora = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+                String lugar = "Medicina General"; // Lugar de atención definido estáticamente
+                String observaciones = observacionesAreaDialog.getText().replace("\n", " ").replace("\r", " ");
+
+                // Agregar nueva entrada al historial
+                writer.write(fechaHora + "," + lugar + "," + observaciones + "\n");
+
+                JOptionPane.showMessageDialog(this, "Historial clínico actualizado correctamente.");
+                dialog.dispose();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error al actualizar el historial clínico: " + ex.getMessage());
+            }
+        });
+
+        verHistorialButton.addActionListener(e -> {
+            // Mostrar historial clínico en una tabla
+            JDialog verDialog = new JDialog(dialog, "Historial Clínico del Paciente", true);
+            verDialog.setSize(600, 400);
+            verDialog.setLayout(new BorderLayout());
+
+            // Modelo y tabla para mostrar el historial
+            DefaultTableModel historialTableModel = new DefaultTableModel(new String[]{"Fecha/Hora", "Lugar", "Observaciones"}, 0);
+            JTable historialTable = new JTable(historialTableModel);
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(historialFile))) {
+                String line;
+                boolean isFirstLine = true; // Saltar encabezado
+                while ((line = reader.readLine()) != null) {
+                    if (isFirstLine) {
+                        isFirstLine = false;
+                        continue;
+                    }
+                    String[] datos = line.split(",");
+                    if (datos.length >= 3) {
+                        historialTableModel.addRow(datos);
+                    }
+                }
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error al leer el historial clínico: " + ex.getMessage());
+            }
+
+            verDialog.add(new JScrollPane(historialTable), BorderLayout.CENTER);
+
+            JButton cerrarButton = new JButton("Cerrar");
+            cerrarButton.addActionListener(event -> verDialog.dispose());
+            verDialog.add(cerrarButton, BorderLayout.SOUTH);
+
+            verDialog.setLocationRelativeTo(dialog);
+            verDialog.setVisible(true);
+        });
+
+        cancelarButton.addActionListener(e -> dialog.dispose());
+
+        dialog.add(actualizarButton);
+        dialog.add(verHistorialButton);
+        dialog.add(cancelarButton);
+
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
+}
+
 
 // FIN HISTORIAL
 
@@ -866,6 +870,31 @@ public class MedicinaGeneral extends JFrame {
             }
         }
     }
+    // Metodo para que se actualice el historial en la tabla
+    private void cargarHistorialEnTabla(File historialFile, JTable historialTable) {
+        DefaultTableModel modeloTabla = (DefaultTableModel) historialTable.getModel();
+        modeloTabla.setRowCount(0); // Limpiar cualquier dato previo en la tabla
+    
+        try (BufferedReader reader = new BufferedReader(new FileReader(historialFile))) {
+            String linea;
+            boolean isFirstLine = true;
+    
+            while ((linea = reader.readLine()) != null) {
+                if (isFirstLine) {
+                    // Ignorar encabezado en el archivo CSV si existe
+                    isFirstLine = false;
+                    continue;
+                }
+                String[] datos = linea.split(","); // Dividir por comas
+                if (datos.length >= 3) {
+                    modeloTabla.addRow(new Object[]{datos[0], datos[1], datos[2]}); // Agregar fila a la tabla
+                }
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Error al cargar el historial clínico: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MedicinaGeneral::new);
     }

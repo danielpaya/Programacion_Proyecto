@@ -3,251 +3,294 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-//777788888999
+
 public class Hospital {
-    // Modelo de tabla compartido entre ORDEN y Historial
-    private static DefaultTableModel historialModel = new DefaultTableModel(new String[]{"Nombre", "Examen", "Estado", "ID"}, 0);
+
+    // Modelo de tabla para almacenar el historial
+    private static DefaultTableModel historialModel = new DefaultTableModel(new String[]{"Nombre", "Examen", "Estado", "ID", "Resumen Doctor"}, 0);
+    private static int pacienteSeleccionado = -1; // Variable para almacenar el índice del paciente seleccionado
 
     public static void main(String[] args) {
-        openMainWindow();
+        // Agregar algunos datos de ejemplo al historial
+        historialModel.addRow(new Object[]{"Juan Perez", "Examen de Sangre", "Pendiente", "12345", ""});
+        historialModel.addRow(new Object[]{"Ana Lopez", "Radiografía", "Completado", "67890", ""});
+        
+        // Iniciar la ventana principal de laboratorio
+        openLaboratorioWindow();
     }
 
-    public static void openMainWindow() {
-        JFrame frame = new JFrame("Hospital");
-        frame.setSize(500, 400);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(null);
-
-        int frameWidth = frame.getWidth();
-        int frameHeight = frame.getHeight();
-
-        JButton btnLaboratorio = new JButton("Laboratorio");
-        JButton btnHospitalizacion = new JButton("Hospitalización");
-        JButton btnUrgencias = new JButton("Urgencias");
-        JButton btnMedicinaGeneral = new JButton("Medicina General");
-        JButton btnRegistro = new JButton("Registro");
-
-        int buttonWidth = 160;
-        int buttonHeight = 50;
-
-        int centerX = (frameWidth - buttonWidth) / 2;
-        int centerY = (frameHeight - buttonHeight) / 2;
-        btnRegistro.setBounds(centerX, centerY, buttonWidth, buttonHeight);
-
-        btnLaboratorio.setBounds(centerX - 180, centerY - 60, buttonWidth, buttonHeight);
-        btnHospitalizacion.setBounds(centerX - 180, centerY + 60, buttonWidth, buttonHeight);
-        btnUrgencias.setBounds(centerX + 180, centerY - 60, buttonWidth, buttonHeight);
-        btnMedicinaGeneral.setBounds(centerX + 180, centerY + 60, buttonWidth, buttonHeight);
-
-        frame.add(btnLaboratorio);
-        frame.add(btnHospitalizacion);
-        frame.add(btnUrgencias);
-        frame.add(btnMedicinaGeneral);
-        frame.add(btnRegistro);
-
-        btnLaboratorio.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.dispose();
-                openLaboratorioWindow();
-            }
-        });
-
-        frame.setVisible(true);
-    }
-
+    // Ventana principal de Laboratorio
     public static void openLaboratorioWindow() {
         JFrame laboratorioFrame = new JFrame("Laboratorio");
-        laboratorioFrame.setSize(300, 200);
-        laboratorioFrame.setLayout(new GridLayout(2, 2, 10, 10));
+        laboratorioFrame.setSize(600, 500);
+        laboratorioFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        laboratorioFrame.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20));
 
-        JButton btnExamenes = new JButton("Exámenes");
-        JButton btnPersonal = new JButton("Personal");
+        laboratorioFrame.getContentPane().setBackground(new Color(240, 248, 255));
+
+        // Botón Exámenes de Sangre
+        JButton btnExamenesSangre = new JButton("Exámenes de Sangre");
+        btnExamenesSangre.setPreferredSize(new Dimension(250, 60));
+        btnExamenesSangre.setBackground(new Color(60, 179, 113));
+        btnExamenesSangre.setForeground(Color.WHITE);
+        btnExamenesSangre.setFont(new Font("Arial", Font.BOLD, 20));
+        btnExamenesSangre.setFocusPainted(false);
+        btnExamenesSangre.setBorder(BorderFactory.createRaisedBevelBorder());
+
+        // Botón Historial
         JButton btnHistorial = new JButton("Historial");
-        JButton btnVolver = new JButton("Volver");
+        btnHistorial.setPreferredSize(new Dimension(250, 60));
+        btnHistorial.setBackground(new Color(60, 179, 113));
+        btnHistorial.setForeground(Color.WHITE);
+        btnHistorial.setFont(new Font("Arial", Font.BOLD, 20));
+        btnHistorial.setFocusPainted(false);
+        btnHistorial.setBorder(BorderFactory.createRaisedBevelBorder());
 
-        btnExamenes.addActionListener(new ActionListener() {
+        // Botón Radiografías
+        JButton btnRadiografias = new JButton("Radiografías");
+        btnRadiografias.setPreferredSize(new Dimension(250, 60));
+        btnRadiografias.setBackground(new Color(60, 179, 113));
+        btnRadiografias.setForeground(Color.WHITE);
+        btnRadiografias.setFont(new Font("Arial", Font.BOLD, 20));
+        btnRadiografias.setFocusPainted(false);
+        btnRadiografias.setBorder(BorderFactory.createRaisedBevelBorder());
+
+        // Botón Salir
+        JButton btnSalir = new JButton("Salir");
+        btnSalir.setPreferredSize(new Dimension(250, 60));
+        btnSalir.setBackground(new Color(220, 20, 60));
+        btnSalir.setForeground(Color.WHITE);
+        btnSalir.setFont(new Font("Arial", Font.BOLD, 20));
+        btnSalir.setFocusPainted(false);
+        btnSalir.setBorder(BorderFactory.createRaisedBevelBorder());
+
+        // Acción para el botón de Exámenes de Sangre
+        btnExamenesSangre.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 laboratorioFrame.dispose();
-                openOrdenWindow();
+                openSeleccionarPacienteWindow(); // Cambiar para abrir ventana de seleccionar paciente
             }
         });
 
+        // Acción para el botón de Historial
         btnHistorial.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                laboratorioFrame.dispose();
                 openHistorialWindow();
             }
         });
 
-        btnPersonal.addActionListener(new ActionListener() {
+        // Acción para el botón de Radiografías
+        btnRadiografias.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 laboratorioFrame.dispose();
-                openMainWindow();
+                openSeleccionarPacienteParaRadiografias(); // Cambiar para abrir ventana de radiografías
             }
         });
-
-        btnVolver.addActionListener(new ActionListener() {
+        
+        
+        // Acción para el botón de Salir (cerrar la aplicación)
+        btnSalir.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                laboratorioFrame.dispose();
-                openMainWindow();
+                int response = JOptionPane.showConfirmDialog(laboratorioFrame, "¿Estás seguro que deseas salir?", "Confirmación de Salida", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                if (response == JOptionPane.YES_OPTION) {
+                    System.exit(0); // Cerrar la aplicación
+                }
             }
         });
 
-        laboratorioFrame.add(btnExamenes);
-        laboratorioFrame.add(btnPersonal);
+        // Agregar los botones a la ventana
+        laboratorioFrame.add(btnExamenesSangre);
         laboratorioFrame.add(btnHistorial);
-        laboratorioFrame.add(btnVolver);
+        laboratorioFrame.add(btnRadiografias);
+        laboratorioFrame.add(btnSalir);
+
         laboratorioFrame.setVisible(true);
     }
 
-    public static void openOrdenWindow() {
-        JFrame ordenFrame = new JFrame("ORDEN");
-        ordenFrame.setSize(300, 350);
-        ordenFrame.setLayout(new BorderLayout());
+    // Ventana para seleccionar un paciente de la lista del historial
+    public static void openSeleccionarPacienteWindow() {
+        JFrame seleccionFrame = new JFrame("Seleccionar Paciente");
+        seleccionFrame.setSize(600, 400);
+        seleccionFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        seleccionFrame.setLayout(new BorderLayout());
 
-        JPanel ordenPanel = new JPanel();
-        JLabel ordenLabel = new JLabel("ORDEN");
-        ordenPanel.add(ordenLabel);
-
-        JTextField idField = new JTextField(15);
-        JTextField nameField = new JTextField(15);
-        JTextField examField = new JTextField(15);
-
-        JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
-        inputPanel.add(new JLabel("ID:"));
-        inputPanel.add(idField);
-        inputPanel.add(new JLabel("Nombre:"));
-        inputPanel.add(nameField);
-        inputPanel.add(new JLabel("Examen a realizar:"));
-        inputPanel.add(examField);
-
-        JButton buscarButton = new JButton("Buscar");
-        buscarButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String id = idField.getText();
-                String name = nameField.getText();
-                String exam = examField.getText();
-                
-                boolean idAndExamMatch = false;
-                Object[] datos = new Object[4];
-
-                for (int i = 0; i < historialModel.getRowCount(); i++) {
-                    if (historialModel.getValueAt(i, 3).equals(id)) {
-                        if (historialModel.getValueAt(i, 1).equals(exam)) {
-                            idAndExamMatch = true;
-                            datos[0] = historialModel.getValueAt(i, 0);  // Nombre
-                            datos[1] = i + 1;  // Orden
-                            datos[2] = historialModel.getValueAt(i, 1);  // Examen
-                            datos[3] = historialModel.getValueAt(i, 2);  // Estado
-                            break;
-                        }
-                    }
-                }
-                
-                if (idAndExamMatch) {
-                    ordenFrame.dispose();
-                    openConfirmacionWindow(datos); // Abrir ventana de confirmación con los datos
-                } else {
-                    if (!id.isEmpty() && !name.isEmpty() && !exam.isEmpty()) {
-                        historialModel.addRow(new Object[]{name, exam, "Pendiente", id});
-                        JOptionPane.showMessageDialog(ordenFrame, "ID agregado al historial con el nuevo examen.");
-                        idField.setText("");
-                        nameField.setText("");
-                        examField.setText("");
-                    } else {
-                        JOptionPane.showMessageDialog(ordenFrame, "Por favor, complete todos los campos.");
-                    }
-                }
-            }
-        });
-
-        JButton volverButton = new JButton("Volver");
-        volverButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ordenFrame.dispose();
-                openLaboratorioWindow();
-            }
-        });
+        JTable pacientesTable = new JTable(historialModel);
+        JScrollPane scrollPane = new JScrollPane(pacientesTable);
+        seleccionFrame.add(scrollPane, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout());
-        buttonPanel.add(buscarButton);
-        buttonPanel.add(volverButton);
+        JButton seleccionarButton = new JButton("Seleccionar");
+        JButton cancelarButton = new JButton("Cancelar");
 
-        ordenFrame.add(ordenPanel, BorderLayout.NORTH);
-        ordenFrame.add(inputPanel, BorderLayout.CENTER);
-        ordenFrame.add(buttonPanel, BorderLayout.SOUTH);
-
-        ordenFrame.setVisible(true);
-    }
-
-    public static void openConfirmacionWindow(Object[] datos) {
-        JFrame confirmacionFrame = new JFrame("Confirmación de Datos");
-        confirmacionFrame.setSize(300, 200);
-        confirmacionFrame.setLayout(new GridLayout(6, 1, 10, 10));
-
-        confirmacionFrame.add(new JLabel("Nombre: " + datos[0]));
-        confirmacionFrame.add(new JLabel("Orden: " + datos[1]));
-        confirmacionFrame.add(new JLabel("Examen a realizar: " + datos[2]));
-        confirmacionFrame.add(new JLabel("Estado del examen: " + datos[3]));
-
-        JButton hacerExamenButton = new JButton("Hacer examen");
-        JButton reagendarButton = new JButton("Reagendar cita");
-
-        hacerExamenButton.addActionListener(new ActionListener() {
+        // Acción para seleccionar el paciente
+        seleccionarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                confirmacionFrame.dispose();
-                openEncuestaWindow(datos[0].toString(), datos[3].toString(), datos[2].toString()); // Pasa el nombre, ID y examen a la ventana de encuesta
+                int selectedRow = pacientesTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    pacienteSeleccionado = selectedRow;  // Guardar el índice del paciente seleccionado
+                    String nombre = pacientesTable.getValueAt(selectedRow, 0).toString();
+                    String id = pacientesTable.getValueAt(selectedRow, 3).toString();
+                    String examen = pacientesTable.getValueAt(selectedRow, 1).toString();
+
+                    seleccionFrame.dispose();
+                    openEncuestaWindow(nombre, id, examen); // Llamar a la ventana de Encuesta con los datos del paciente
+                } else {
+                    JOptionPane.showMessageDialog(seleccionFrame, "Por favor, selecciona un paciente.");
+                }
             }
         });
 
-        reagendarButton.addActionListener(new ActionListener() {
+        // Acción para cancelar la selección
+        cancelarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                confirmacionFrame.dispose();
-                openOrdenWindow();
+                seleccionFrame.dispose();
+                openLaboratorioWindow(); // Regresar a la ventana principal de laboratorio
             }
         });
 
-        confirmacionFrame.add(hacerExamenButton);
-        confirmacionFrame.add(reagendarButton);
+        buttonPanel.add(seleccionarButton);
+        buttonPanel.add(cancelarButton);
+        seleccionFrame.add(buttonPanel, BorderLayout.SOUTH);
 
-        confirmacionFrame.setVisible(true);
+        seleccionFrame.setVisible(true);
     }
 
+    // Ventana de Radiografías
+    public static void openRadiografiasWindow() {
+        JFrame radiografiasFrame = new JFrame("Radiografías");
+        radiografiasFrame.setSize(600, 500);
+        radiografiasFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        radiografiasFrame.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20));
+
+        radiografiasFrame.getContentPane().setBackground(new Color(240, 248, 255));
+
+        // Botón Piernas
+        JButton btnPiernas = new JButton("Piernas");
+        btnPiernas.setPreferredSize(new Dimension(250, 60));
+        btnPiernas.setBackground(new Color(60, 179, 113));
+        btnPiernas.setForeground(Color.WHITE);
+        btnPiernas.setFont(new Font("Arial", Font.BOLD, 20));
+        btnPiernas.setFocusPainted(false);
+        btnPiernas.setBorder(BorderFactory.createRaisedBevelBorder());
+
+        
+
+        // Botón Brazos
+        JButton btnBrazos = new JButton("Brazos");
+        btnBrazos.setPreferredSize(new Dimension(250, 60));
+        btnBrazos.setBackground(new Color(60, 179, 113));
+        btnBrazos.setForeground(Color.WHITE);
+        btnBrazos.setFont(new Font("Arial", Font.BOLD, 20));
+        btnBrazos.setFocusPainted(false);
+        btnBrazos.setBorder(BorderFactory.createRaisedBevelBorder());
+
+        // Botón Torso
+        JButton btnTorso = new JButton("Torso");
+        btnTorso.setPreferredSize(new Dimension(250, 60));
+        btnTorso.setBackground(new Color(60, 179, 113));
+        btnTorso.setForeground(Color.WHITE);
+        btnTorso.setFont(new Font("Arial", Font.BOLD, 20));
+        btnTorso.setFocusPainted(false);
+        btnTorso.setBorder(BorderFactory.createRaisedBevelBorder());
+
+        // Botón Cabeza
+        JButton btnCabeza = new JButton("Cabeza");
+        btnCabeza.setPreferredSize(new Dimension(250, 60));
+        btnCabeza.setBackground(new Color(60, 179, 113));
+        btnCabeza.setForeground(Color.WHITE);
+        btnCabeza.setFont(new Font("Arial", Font.BOLD, 20));
+        btnCabeza.setFocusPainted(false);
+        btnCabeza.setBorder(BorderFactory.createRaisedBevelBorder());
+
+        // Acción para el botón de Piernas
+        btnPiernas.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                radiografiasFrame.dispose(); // Cerrar la ventana de Radiografías
+                openPatasWindow(); // Abrir la ventana de Piernas
+            }
+        });
+
+        // Acción para el botón de Brazos
+        btnBrazos.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                radiografiasFrame.dispose(); // Cerrar la ventana de Radiografías
+                openManitosWindow(); // Abrir la ventana de Piernas
+            }
+        });
+
+        // Acción para el botón de Torso
+        btnTorso.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                radiografiasFrame.dispose(); // Cerrar la ventana de Radiografías
+                openPeshitoWindow(); // Abrir la ventana de Torso
+            }
+        });
+
+        // Acción para el botón de Cabeza
+        btnCabeza.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                radiografiasFrame.dispose(); // Cerrar la ventana de Radiografías
+                openCabecillaWindow(); // Abrir la ventana de Cabeza
+            }
+        });
+
+        // Agregar los botones a la ventana
+        radiografiasFrame.add(btnPiernas);
+        radiografiasFrame.add(btnBrazos);
+        radiografiasFrame.add(btnTorso);
+        radiografiasFrame.add(btnCabeza);
+
+        radiografiasFrame.setVisible(true);
+    }
+
+    // Ventana de Encuesta de Laboratorio
     public static void openEncuestaWindow(String nombre, String id, String examen) {
         JFrame encuestaFrame = new JFrame("Encuesta de Laboratorio");
-        encuestaFrame.setSize(500, 600);
+        encuestaFrame.setSize(600, 800);  // Aumentar tamaño de la ventana
         encuestaFrame.setLayout(new BorderLayout());
+        encuestaFrame.getContentPane().setBackground(new Color(240, 248, 255));
 
         JLabel titulo = new JLabel("Paciente: " + nombre + " | ID: " + id, SwingConstants.CENTER);
-        titulo.setFont(new Font("Arial", Font.BOLD, 16));
+        titulo.setFont(new Font("Arial", Font.BOLD, 18));
         encuestaFrame.add(titulo, BorderLayout.NORTH);
 
         JPanel encuestaPanel = new JPanel();
-        encuestaPanel.setLayout(new GridLayout(10, 2, 10, 10));
+        encuestaPanel.setLayout(new GridLayout(12, 2, 10, 10));  // Ajustar tamaño para agregar más filas
 
         JTextField[] fields = new JTextField[10];
         String[] labels = {
-            "Dolor (1-11):", "Ubicación del dolor:", "Presión corporal:", "Temperatura:", 
-            "Saturación:", "Oxigenación:", "Nivel de Hemoglobina:", "Nivel de Proteína:", 
+            "Dolor (1-11):", "Ubicación del dolor:", "Presión corporal:", "Temperatura:",
+            "Saturación:", "Oxigenación:", "Nivel de Hemoglobina:", "Nivel de Proteína:",
             "Nivel de Plaquetas:", "Nivel de Glóbulos Rojos y Blancos:"
         };
 
+        // Agregar campos para los datos clínicos
         for (int i = 0; i < labels.length; i++) {
             encuestaPanel.add(new JLabel(labels[i]));
             fields[i] = new JTextField();
             encuestaPanel.add(fields[i]);
         }
+
+        // Agregar campo para "Resumen Doctor"
+        encuestaPanel.add(new JLabel("Resumen Doctor:"));
+        JTextArea resumenDoctorArea = new JTextArea(5, 40); // Ámbito de texto para el resumen del doctor
+        resumenDoctorArea.setLineWrap(true);
+        resumenDoctorArea.setWrapStyleWord(true);
+        resumenDoctorArea.setFont(new Font("Arial", Font.PLAIN, 14));
+        resumenDoctorArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+        JScrollPane resumenDoctorScroll = new JScrollPane(resumenDoctorArea);
+        encuestaPanel.add(resumenDoctorScroll);
 
         encuestaFrame.add(encuestaPanel, BorderLayout.CENTER);
 
@@ -255,96 +298,69 @@ public class Hospital {
         buttonPanel.setLayout(new FlowLayout());
 
         JButton volverButton = new JButton("Volver");
+        volverButton.setBackground(new Color(220, 20, 60));
+        volverButton.setForeground(Color.WHITE);
+
+        JButton siguienteButton = new JButton("Siguiente");
+        siguienteButton.setBackground(new Color(60, 179, 113));
+        siguienteButton.setForeground(Color.WHITE);
+
+        buttonPanel.add(volverButton);
+        buttonPanel.add(siguienteButton);
+
+        encuestaFrame.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Acción del botón "Volver"
         volverButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                encuestaFrame.dispose();
-                openLaboratorioWindow();
+                encuestaFrame.dispose();  // Cerrar la ventana de encuesta
+                openLaboratorioWindow();  // Regresar a la ventana de laboratorio
             }
         });
 
-        JButton finalizarButton = new JButton("Finalizar");
-        finalizarButton.addActionListener(new ActionListener() {
+        // Acción del botón "Siguiente"
+        siguienteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                encuestaFrame.dispose();
-                openResumenMedico(nombre, id, fields);
+                // Mostrar el resumen médico y actualizar la fila del paciente
+                openResumenMedico(nombre, id, fields, resumenDoctorArea.getText());
             }
         });
 
-        buttonPanel.add(volverButton);
-        buttonPanel.add(finalizarButton);
-
-        encuestaFrame.add(buttonPanel, BorderLayout.SOUTH);
         encuestaFrame.setVisible(true);
     }
 
-    public static void openResumenMedico(String nombre, String id, JTextField[] fields) {
+    // Ventana de Resumen Médico
+    public static void openResumenMedico(String nombre, String id, JTextField[] fields, String resumenDoctor) {
+        // Actualizar el estado del paciente y agregar el resumen doctor
+        if (pacienteSeleccionado != -1) {
+            // Actualizar estado del paciente a "Completado"
+            historialModel.setValueAt("Completado", pacienteSeleccionado, 2);
+            // Actualizar "Resumen Doctor"
+            historialModel.setValueAt(resumenDoctor, pacienteSeleccionado, 4);
+        }
+
+        // Crear una ventana para mostrar el resumen médico
         JFrame resumenFrame = new JFrame("Resumen Médico");
-        resumenFrame.setSize(500, 600);
+        resumenFrame.setSize(600, 600);
         resumenFrame.setLayout(new BorderLayout());
+        resumenFrame.getContentPane().setBackground(new Color(240, 248, 255));
 
         StringBuilder resumenText = new StringBuilder("<html><b>Datos de la Encuesta</b><br><br>");
         String[] labels = {
-            "Dolor (1-11):", "Ubicación del dolor:", "Presión corporal:", "Temperatura:", 
-            "Saturación:", "Oxigenación:", "Nivel de Hemoglobina:", "Nivel de Proteína:", 
+            "Dolor (1-11):", "Ubicación del dolor:", "Presión corporal:", "Temperatura:",
+            "Saturación:", "Oxigenación:", "Nivel de Hemoglobina:", "Nivel de Proteína:",
             "Nivel de Plaquetas:", "Nivel de Glóbulos Rojos y Blancos:"
         };
 
-        StringBuilder alertas = new StringBuilder();
-
-        try {
-            String presion = fields[2].getText();
-            if (presion.matches("\\d+/\\d+")) {
-                int sistolica = Integer.parseInt(presion.split("/")[0]);
-                if (sistolica > 120) alertas.append("Hipertensión detectada.<br>");
-            }
-            resumenText.append(labels[2]).append(" ").append(presion).append("<br>");
-
-            double temperatura = Double.parseDouble(fields[3].getText());
-            resumenText.append(labels[3]).append(" ").append(temperatura);
-            if (temperatura < 36) alertas.append("Hipotermia detectada.<br>");
-            else if (temperatura > 38) alertas.append("Hipertermia detectada.<br>");
-            resumenText.append("<br>");
-
-            double saturacion = Double.parseDouble(fields[4].getText());
-            resumenText.append(labels[4]).append(" ").append(saturacion);
-            if (saturacion < 88) alertas.append("Atención médica urgente para saturación.<br>");
-            resumenText.append("<br>");
-
-            double oxigenacion = Double.parseDouble(fields[5].getText());
-            resumenText.append(labels[5]).append(" ").append(oxigenacion);
-            if (oxigenacion < 88) alertas.append("Atención médica urgente para oxigenación.<br>");
-            resumenText.append("<br>");
-
-            double hemoglobina = Double.parseDouble(fields[6].getText());
-            resumenText.append(labels[6]).append(" ").append(hemoglobina);
-            if (hemoglobina < 11) alertas.append("Anemia detectada.<br>");
-            else if (hemoglobina > 16) alertas.append("Revisión médica urgente para hemoglobina.<br>");
-            resumenText.append("<br>");
-
-            double proteina = Double.parseDouble(fields[7].getText());
-            resumenText.append(labels[7]).append(" ").append(proteina);
-            if (proteina < 60) alertas.append("Se recomienda mayor consumo de proteínas.<br>");
-            resumenText.append("<br>");
-
-            double plaquetas = Double.parseDouble(fields[8].getText());
-            resumenText.append(labels[8]).append(" ").append(plaquetas);
-            if (plaquetas < 150 || plaquetas > 400) alertas.append("Revisión médica urgente para nivel de plaquetas.<br>");
-            resumenText.append("<br>");
-
-            double globulos = Double.parseDouble(fields[9].getText());
-            resumenText.append(labels[9]).append(" ").append(globulos);
-            if (globulos < 4.35 || globulos > 5.65) alertas.append("Revisión médica urgente para nivel de glóbulos.<br>");
-            resumenText.append("<br>");
-
-        } catch (NumberFormatException e) {
-            alertas.append("Error en el ingreso de datos numéricos.<br>");
+        // Aquí procesamos los datos ingresados en la encuesta y agregamos alertas
+        for (int i = 0; i < fields.length; i++) {
+            resumenText.append(labels[i]).append(" ").append(fields[i].getText()).append("<br>");
         }
 
         resumenText.append("<br><b>Paciente:</b> ").append(nombre).append("<br><b>ID:</b> ").append(id);
-        resumenText.append("<br><br><b>Análisis:</b><br>").append(alertas.toString());
-        resumenText.append("</html>");
+        resumenText.append("<br><br><b>Resumen Doctor:</b><br>").append(resumenDoctor).append("</html>");
 
         JLabel resumenLabel = new JLabel(resumenText.toString());
         resumenFrame.add(resumenLabel, BorderLayout.CENTER);
@@ -355,7 +371,6 @@ public class Hospital {
         siguienteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                actualizarEstadoExamen(id);
                 resumenFrame.dispose();
                 openLaboratorioWindow();
             }
@@ -367,24 +382,46 @@ public class Hospital {
         resumenFrame.setVisible(true);
     }
 
-    private static void actualizarEstadoExamen(String id) {
-        for (int i = 0; i < historialModel.getRowCount(); i++) {
-            if (historialModel.getValueAt(i, 3).equals(id) && historialModel.getValueAt(i, 2).equals("Pendiente")) {
-                historialModel.setValueAt("Realizado", i, 2);
-                break;
-            }
-        }
-    }
-
+    // Ventana de Historial de Pacientes
     public static void openHistorialWindow() {
-        JFrame historialFrame = new JFrame("Historial");
-        historialFrame.setSize(500, 300);
-        historialFrame.setLayout(new BorderLayout());
+        JFrame historialFrame = new JFrame("Historial de Pacientes");
+        historialFrame.setSize(600, 400);
+        historialFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JTable table = new JTable(historialModel);
-        JScrollPane scrollPane = new JScrollPane(table);
+        // Crear una tabla con los datos del historial
+        JTable historialTable = new JTable(historialModel) {
+            public boolean isCellEditable(int row, int column) {
+                return false; // Hacer que todas las celdas sean no editables
+            }
+        };
+
+        // Agregar un botón en la última columna "Acción"
+        JButton resumenButton = new JButton("Ver Resumen");
+        resumenButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = historialTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    String resumen = (String) historialTable.getValueAt(selectedRow, 4); // Resumen Doctor
+                    if (resumen.isEmpty()) {
+                        JOptionPane.showMessageDialog(historialFrame, "Examen no realizado aún.", "Resumen Médico", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(historialFrame, resumen, "Resumen Médico", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(historialFrame, "Por favor, selecciona un paciente.");
+                }
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(historialTable);
+        historialFrame.add(scrollPane, BorderLayout.CENTER);
 
         JButton volverButton = new JButton("Volver");
+        volverButton.setBackground(new Color(220, 20, 60));
+        volverButton.setForeground(Color.WHITE);
+        volverButton.setFont(new Font("Arial", Font.BOLD, 16));
+
         volverButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -394,11 +431,469 @@ public class Hospital {
         });
 
         JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout());
         buttonPanel.add(volverButton);
+        buttonPanel.add(resumenButton);
 
-        historialFrame.add(scrollPane, BorderLayout.CENTER);
         historialFrame.add(buttonPanel, BorderLayout.SOUTH);
-
         historialFrame.setVisible(true);
     }
+
+    public static void openPiernasWindow() {
+        JFrame piernasFrame = new JFrame("Radiografías de Piernas");
+        piernasFrame.setSize(800, 600);
+        piernasFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        piernasFrame.setLayout(new BorderLayout());
+    
+        // Panel para contener las imágenes
+        JPanel imagePanel = new JPanel();
+        imagePanel.setLayout(new GridLayout(1, 2, 10, 10));
+    
+        // Cargar las imágenes
+        ImageIcon leftLegImage = new ImageIcon("pierna_izquierda.jpg"); // Ruta a la imagen de la pierna izquierda
+        ImageIcon rightLegImage = new ImageIcon("pierna_derecha.jpg"); // Ruta a la imagen de la pierna derecha
+    
+        // Escalar las imágenes para que se ajusten al tamaño de los JLabel
+        Image leftImage = leftLegImage.getImage().getScaledInstance(300, 400, Image.SCALE_SMOOTH);
+        Image rightImage = rightLegImage.getImage().getScaledInstance(300, 400, Image.SCALE_SMOOTH);
+    
+        // Crear JLabel para las imágenes
+        JLabel leftImageLabel = new JLabel(new ImageIcon(leftImage));
+        JLabel rightImageLabel = new JLabel(new ImageIcon(rightImage));
+    
+        // Añadir las imágenes al panel
+        imagePanel.add(leftImageLabel);
+        imagePanel.add(rightImageLabel);
+    
+        // Panel para el cuadro de texto
+        JPanel textPanel = new JPanel();
+        textPanel.setLayout(new BorderLayout());
+        JTextArea commentsArea = new JTextArea(10, 40);
+        commentsArea.setLineWrap(true);
+        commentsArea.setWrapStyleWord(true);
+        commentsArea.setBorder(BorderFactory.createTitledBorder("Comentarios del operador"));
+        JScrollPane scrollPane = new JScrollPane(commentsArea);
+    
+        textPanel.add(scrollPane, BorderLayout.CENTER);
+    
+        // Panel para el botón "Volver"
+        JPanel buttonPanel = new JPanel();
+        JButton volverButton = new JButton("Volver");
+        volverButton.setBackground(new Color(220, 20, 60));
+        volverButton.setForeground(Color.WHITE);
+        volverButton.setFont(new Font("Arial", Font.BOLD, 16));
+    
+        volverButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                piernasFrame.dispose(); // Cerrar la ventana actual
+                openRadiografiasWindow(); // Volver a la ventana de Radiografías
+            }
+        });
+    
+        buttonPanel.add(volverButton);
+    
+        // Agregar los paneles al marco
+        piernasFrame.add(imagePanel, BorderLayout.CENTER);
+        piernasFrame.add(textPanel, BorderLayout.SOUTH);
+        piernasFrame.add(buttonPanel, BorderLayout.NORTH);
+    
+        piernasFrame.setVisible(true);
+    }
+    public static void openPatasWindow() {
+        JFrame piernasFrame = new JFrame("Radiografías de las Piernas");
+        piernasFrame.setSize(800, 600);
+        piernasFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        piernasFrame.setLayout(new BorderLayout());
+    
+        // Panel para contener las imágenes
+        JPanel imagePanel = new JPanel();
+        imagePanel.setLayout(new GridLayout(1, 2, 10, 10));
+    
+        // Cargar las imágenes
+        ImageIcon leftLegImage = new ImageIcon("c:\\Users\\santiago\\Documents\\JAVA pOO\\pierna_izquierda.jpg"); // Ruta a la imagen de la pierna izquierda
+        ImageIcon rightLegImage = new ImageIcon("c:\\Users\\santiago\\Documents\\JAVA pOO\\pierna_derecha.jpg"); // Ruta a la imagen de la pierna derecha
+    
+        // Escalar las imágenes para que se ajusten al tamaño de los JLabel
+        Image leftImage = leftLegImage.getImage().getScaledInstance(300, 400, Image.SCALE_SMOOTH);
+        Image rightImage = rightLegImage.getImage().getScaledInstance(300, 400, Image.SCALE_SMOOTH);
+    
+        // Crear JLabel para las imágenes
+        JLabel leftImageLabel = new JLabel(new ImageIcon(leftImage));
+        JLabel rightImageLabel = new JLabel(new ImageIcon(rightImage));
+    
+        // Añadir las imágenes al panel
+        imagePanel.add(leftImageLabel);
+        imagePanel.add(rightImageLabel);
+    
+        // Panel para el cuadro de texto
+        JPanel textPanel = new JPanel();
+        textPanel.setLayout(new BorderLayout());
+        JTextArea commentsArea = new JTextArea(10, 40);
+        commentsArea.setLineWrap(true);
+        commentsArea.setWrapStyleWord(true);
+        commentsArea.setBorder(BorderFactory.createTitledBorder("OBSERVACIONES DEL DOCTOR"));
+        JScrollPane scrollPane = new JScrollPane(commentsArea);
+    
+        textPanel.add(scrollPane, BorderLayout.CENTER);
+    
+        // Panel para los botones
+        JPanel buttonPanel = new JPanel();
+    
+        // Botón "Volver"
+        JButton volverButton = new JButton("Volver");
+        volverButton.setBackground(new Color(220, 20, 60));
+        volverButton.setForeground(Color.WHITE);
+        volverButton.setFont(new Font("Arial", Font.BOLD, 16));
+    
+        volverButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                piernasFrame.dispose(); // Cerrar la ventana actual
+                openRadiografiasWindow(); // Volver a la ventana de Radiografías
+            }
+        });
+    
+        // Botón "Siguiente"
+        JButton siguienteButton = new JButton("Siguiente");
+        siguienteButton.setBackground(new Color(60, 179, 113));
+        siguienteButton.setForeground(Color.WHITE);
+        siguienteButton.setFont(new Font("Arial", Font.BOLD, 16));
+    
+        siguienteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (pacienteSeleccionado != -1) {
+                    String comentarios = commentsArea.getText().trim();
+                    if (!comentarios.isEmpty()) {
+                        // Guardar los comentarios en el historial
+                        historialModel.setValueAt(comentarios, pacienteSeleccionado, 4); // Columna "Resumen Doctor"
+                        historialModel.setValueAt("Completado", pacienteSeleccionado, 2); // Marcar como "Completado"
+                    }
+                }
+                piernasFrame.dispose(); // Cerrar la ventana actual
+                openLaboratorioWindow(); // Volver a la ventana principal
+            }
+        });
+    
+        buttonPanel.add(volverButton);
+        buttonPanel.add(siguienteButton);
+    
+        // Agregar los paneles al marco
+        piernasFrame.add(imagePanel, BorderLayout.CENTER);
+        piernasFrame.add(textPanel, BorderLayout.SOUTH);
+        piernasFrame.add(buttonPanel, BorderLayout.NORTH);
+    
+        piernasFrame.setVisible(true);
+    }
+    
+    public static void openManitosWindow() {
+        JFrame brazosFrame = new JFrame("Radiografías de los Brazos");
+        brazosFrame.setSize(800, 600);
+        brazosFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        brazosFrame.setLayout(new BorderLayout());
+    
+        // Panel para contener las imágenes
+        JPanel imagePanel = new JPanel();
+        imagePanel.setLayout(new GridLayout(1, 2, 10, 10));
+    
+        // Cargar las imágenes
+        ImageIcon leftArmImage = new ImageIcon("c:\\Users\\santiago\\Documents\\JAVA pOO\\manito_der.jpg"); // Ruta a la imagen del brazo izquierdo
+        ImageIcon rightArmImage = new ImageIcon("c:\\Users\\santiago\\Documents\\JAVA pOO\\manito_izq.jpg"); // Ruta a la imagen del brazo derecho
+    
+        // Escalar las imágenes para que se ajusten al tamaño de los JLabel
+        Image leftImage = leftArmImage.getImage().getScaledInstance(300, 400, Image.SCALE_SMOOTH);
+        Image rightImage = rightArmImage.getImage().getScaledInstance(300, 400, Image.SCALE_SMOOTH);
+    
+        // Crear JLabel para las imágenes
+        JLabel leftImageLabel = new JLabel(new ImageIcon(leftImage));
+        JLabel rightImageLabel = new JLabel(new ImageIcon(rightImage));
+    
+        // Añadir las imágenes al panel
+        imagePanel.add(leftImageLabel);
+        imagePanel.add(rightImageLabel);
+    
+        // Panel para el cuadro de texto
+        JPanel textPanel = new JPanel();
+        textPanel.setLayout(new BorderLayout());
+        JTextArea commentsArea = new JTextArea(10, 40);
+        commentsArea.setLineWrap(true);
+        commentsArea.setWrapStyleWord(true);
+        commentsArea.setBorder(BorderFactory.createTitledBorder("OBSERVACIONES DEL DOCTOR"));
+        JScrollPane scrollPane = new JScrollPane(commentsArea);
+    
+        textPanel.add(scrollPane, BorderLayout.CENTER);
+    
+        // Panel para los botones
+        JPanel buttonPanel = new JPanel();
+    
+        // Botón "Volver"
+        JButton volverButton = new JButton("Volver");
+        volverButton.setBackground(new Color(220, 20, 60));
+        volverButton.setForeground(Color.WHITE);
+        volverButton.setFont(new Font("Arial", Font.BOLD, 16));
+    
+        volverButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                brazosFrame.dispose(); // Cerrar la ventana actual
+                openRadiografiasWindow(); // Volver a la ventana de Radiografías
+            }
+        });
+    
+        // Botón "Siguiente"
+        JButton siguienteButton = new JButton("Siguiente");
+        siguienteButton.setBackground(new Color(60, 179, 113));
+        siguienteButton.setForeground(Color.WHITE);
+        siguienteButton.setFont(new Font("Arial", Font.BOLD, 16));
+    
+        siguienteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (pacienteSeleccionado != -1) {
+                    String comentarios = commentsArea.getText().trim();
+                    if (!comentarios.isEmpty()) {
+                        // Guardar los comentarios en el historial
+                        historialModel.setValueAt(comentarios, pacienteSeleccionado, 4); // Columna "Resumen Doctor"
+                        historialModel.setValueAt("Completado", pacienteSeleccionado, 2); // Marcar como "Completado"
+                    }
+                }
+                brazosFrame.dispose(); // Cerrar la ventana actual
+                openLaboratorioWindow(); // Volver a la ventana principal
+            }
+        });
+    
+        buttonPanel.add(volverButton);
+        buttonPanel.add(siguienteButton);
+    
+        // Agregar los paneles al marco
+        brazosFrame.add(imagePanel, BorderLayout.CENTER);
+        brazosFrame.add(textPanel, BorderLayout.SOUTH);
+        brazosFrame.add(buttonPanel, BorderLayout.NORTH);
+    
+        brazosFrame.setVisible(true);
+    }
+    
+    public static void openPeshitoWindow() {
+        JFrame torsoFrame = new JFrame("Radiografías del Torso");
+        torsoFrame.setSize(800, 600);
+        torsoFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        torsoFrame.setLayout(new BorderLayout());
+    
+        // Panel para contener las imágenes
+        JPanel imagePanel = new JPanel();
+        imagePanel.setLayout(new GridLayout(1, 2, 10, 10));
+    
+        // Cargar las imágenes
+        ImageIcon frontTorsoImage = new ImageIcon("c:\\Users\\santiago\\Documents\\JAVA pOO\\PESHO_1.jpg"); // Ruta a la imagen del torso frontal
+        ImageIcon backTorsoImage = new ImageIcon("c:\\Users\\santiago\\Documents\\JAVA pOO\\PESHO_2.jpg"); // Ruta a la imagen del torso dorsal
+    
+        // Escalar las imágenes para que se ajusten al tamaño de los JLabel
+        Image frontImage = frontTorsoImage.getImage().getScaledInstance(300, 400, Image.SCALE_SMOOTH);
+        Image backImage = backTorsoImage.getImage().getScaledInstance(300, 400, Image.SCALE_SMOOTH);
+    
+        // Crear JLabel para las imágenes
+        JLabel frontImageLabel = new JLabel(new ImageIcon(frontImage));
+        JLabel backImageLabel = new JLabel(new ImageIcon(backImage));
+    
+        // Añadir las imágenes al panel
+        imagePanel.add(frontImageLabel);
+        imagePanel.add(backImageLabel);
+    
+        // Panel para el cuadro de texto
+        JPanel textPanel = new JPanel();
+        textPanel.setLayout(new BorderLayout());
+        JTextArea commentsArea = new JTextArea(10, 40);
+        commentsArea.setLineWrap(true);
+        commentsArea.setWrapStyleWord(true);
+        commentsArea.setBorder(BorderFactory.createTitledBorder("OBSERVACIONES DEL DOCTOR"));
+        JScrollPane scrollPane = new JScrollPane(commentsArea);
+    
+        textPanel.add(scrollPane, BorderLayout.CENTER);
+    
+        // Panel para los botones
+        JPanel buttonPanel = new JPanel();
+    
+        // Botón "Volver"
+        JButton volverButton = new JButton("Volver");
+        volverButton.setBackground(new Color(220, 20, 60));
+        volverButton.setForeground(Color.WHITE);
+        volverButton.setFont(new Font("Arial", Font.BOLD, 16));
+    
+        volverButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                torsoFrame.dispose(); // Cerrar la ventana actual
+                openRadiografiasWindow(); // Volver a la ventana de Radiografías
+            }
+        });
+    
+        // Botón "Siguiente"
+        JButton siguienteButton = new JButton("Siguiente");
+        siguienteButton.setBackground(new Color(60, 179, 113));
+        siguienteButton.setForeground(Color.WHITE);
+        siguienteButton.setFont(new Font("Arial", Font.BOLD, 16));
+    
+        siguienteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (pacienteSeleccionado != -1) {
+                    String comentarios = commentsArea.getText().trim();
+                    if (!comentarios.isEmpty()) {
+                        // Guardar los comentarios en el historial
+                        historialModel.setValueAt(comentarios, pacienteSeleccionado, 4); // Columna "Resumen Doctor"
+                        historialModel.setValueAt("Completado", pacienteSeleccionado, 2); // Marcar como "Completado"
+                    }
+                }
+                torsoFrame.dispose(); // Cerrar la ventana actual
+                openLaboratorioWindow(); // Volver a la ventana principal
+            }
+        });
+    
+        buttonPanel.add(volverButton);
+        buttonPanel.add(siguienteButton);
+    
+        // Agregar los paneles al marco
+        torsoFrame.add(imagePanel, BorderLayout.CENTER);
+        torsoFrame.add(textPanel, BorderLayout.SOUTH);
+        torsoFrame.add(buttonPanel, BorderLayout.NORTH);
+    
+        torsoFrame.setVisible(true);
+    }
+    
+
+    public static void openCabecillaWindow() {
+        JFrame cabezaFrame = new JFrame("Radiografías de la Cabeza");
+        cabezaFrame.setSize(800, 600);
+        cabezaFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        cabezaFrame.setLayout(new BorderLayout());
+    
+        // Panel para contener las imágenes
+        JPanel imagePanel = new JPanel();
+        imagePanel.setLayout(new GridLayout(1, 2, 10, 10));
+    
+        // Cargar las imágenes
+        ImageIcon frontHeadImage = new ImageIcon("c:\\Users\\santiago\\Documents\\JAVA pOO\\CABEZA_2.jpg"); // Ruta a la imagen de la cabeza frontal
+        ImageIcon sideHeadImage = new ImageIcon("c:\\Users\\santiago\\Documents\\JAVA pOO\\CABEZA_1.jpg"); // Ruta a la imagen de la cabeza lateral
+    
+        // Escalar las imágenes para que se ajusten al tamaño de los JLabel
+        Image frontImage = frontHeadImage.getImage().getScaledInstance(300, 400, Image.SCALE_SMOOTH);
+        Image sideImage = sideHeadImage.getImage().getScaledInstance(300, 400, Image.SCALE_SMOOTH);
+    
+        // Crear JLabel para las imágenes
+        JLabel frontImageLabel = new JLabel(new ImageIcon(frontImage));
+        JLabel sideImageLabel = new JLabel(new ImageIcon(sideImage));
+    
+        // Añadir las imágenes al panel
+        imagePanel.add(frontImageLabel);
+        imagePanel.add(sideImageLabel);
+    
+        // Panel para el cuadro de texto
+        JPanel textPanel = new JPanel();
+        textPanel.setLayout(new BorderLayout());
+        JTextArea commentsArea = new JTextArea(10, 40);
+        commentsArea.setLineWrap(true);
+        commentsArea.setWrapStyleWord(true);
+        commentsArea.setBorder(BorderFactory.createTitledBorder("OBSERVACION DEL DOCTOR"));
+        JScrollPane scrollPane = new JScrollPane(commentsArea);
+    
+        textPanel.add(scrollPane, BorderLayout.CENTER);
+    
+        // Panel para los botones
+        JPanel buttonPanel = new JPanel();
+    
+        // Botón "Volver"
+        JButton volverButton = new JButton("Volver");
+        volverButton.setBackground(new Color(220, 20, 60));
+        volverButton.setForeground(Color.WHITE);
+        volverButton.setFont(new Font("Arial", Font.BOLD, 16));
+    
+        volverButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cabezaFrame.dispose(); // Cerrar la ventana actual
+                openRadiografiasWindow(); // Volver a la ventana de Radiografías
+            }
+        });
+    
+        // Botón "Siguiente"
+        JButton siguienteButton = new JButton("Siguiente");
+        siguienteButton.setBackground(new Color(60, 179, 113));
+        siguienteButton.setForeground(Color.WHITE);
+        siguienteButton.setFont(new Font("Arial", Font.BOLD, 16));
+    
+        siguienteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (pacienteSeleccionado != -1) {
+                    String comentarios = commentsArea.getText().trim();
+                    if (!comentarios.isEmpty()) {
+                        // Guardar los comentarios en el historial
+                        historialModel.setValueAt(comentarios, pacienteSeleccionado, 4); // Columna "Resumen Doctor"
+                        historialModel.setValueAt("Completado", pacienteSeleccionado, 2); // Marcar como "Completado"
+                    }
+                }
+                cabezaFrame.dispose(); // Cerrar la ventana actual
+                openLaboratorioWindow(); // Volver a la ventana principal
+            }
+        });
+    
+        buttonPanel.add(volverButton);
+        buttonPanel.add(siguienteButton);
+    
+        // Agregar los paneles al marco
+        cabezaFrame.add(imagePanel, BorderLayout.CENTER);
+        cabezaFrame.add(textPanel, BorderLayout.SOUTH);
+        cabezaFrame.add(buttonPanel, BorderLayout.NORTH);
+    
+        cabezaFrame.setVisible(true);
+    }
+    
+
+
+public static void openSeleccionarPacienteParaRadiografias() {
+    JFrame seleccionFrame = new JFrame("Seleccionar Paciente para Radiografías");
+    seleccionFrame.setSize(600, 400);
+    seleccionFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    seleccionFrame.setLayout(new BorderLayout());
+
+    JTable pacientesTable = new JTable(historialModel);
+    JScrollPane scrollPane = new JScrollPane(pacientesTable);
+    seleccionFrame.add(scrollPane, BorderLayout.CENTER);
+
+    JPanel buttonPanel = new JPanel();
+    JButton seleccionarButton = new JButton("Seleccionar");
+    JButton cancelarButton = new JButton("Cancelar");
+
+    // Acción para seleccionar el paciente
+    seleccionarButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int selectedRow = pacientesTable.getSelectedRow();
+            if (selectedRow != -1) {
+                pacienteSeleccionado = selectedRow; // Guardar el índice del paciente seleccionado
+                seleccionFrame.dispose(); // Cerrar la ventana de selección
+                openRadiografiasWindow(); // Abrir la ventana de radiografías
+            } else {
+                JOptionPane.showMessageDialog(seleccionFrame, "Por favor, selecciona un paciente.");
+            }
+        }
+    });
+
+    // Acción para cancelar la selección
+    cancelarButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            seleccionFrame.dispose();
+            openLaboratorioWindow(); // Regresar a la ventana principal
+        }
+    });
+
+    buttonPanel.add(seleccionarButton);
+    buttonPanel.add(cancelarButton);
+    seleccionFrame.add(buttonPanel, BorderLayout.SOUTH);
+
+    seleccionFrame.setVisible(true);
+}
+
 }
