@@ -1,7 +1,3 @@
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -19,10 +15,22 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+
 import java.time.Duration;
 
 public class Interfaz extends JFrame {
-    public static String entrada = "C:/PERSONAL/UNIVERSIDAD/SEGUNDO SEMESTRE/POO/TERCER CORTE/PROYECTO FINAL HOSPITALIZACION/PLANTILLA DATOS INICIALES PACIENTES.csv";
+    public static String entrada = "pacientes_hospitalizacion.csv";
     public static String salida = "C:/PERSONAL/UNIVERSIDAD/SEGUNDO SEMESTRE/POO/TERCER CORTE/PROYECTO FINAL HOSPITALIZACION/INFORME DE PERSONAS HOSPITALIZADA.csv";
 
     public static void tiempohosp(Habitaciones habitacion) {    
@@ -160,30 +168,24 @@ public class Interfaz extends JFrame {
     }
 
     public boolean buscarOrdenEnCSV(String ordenBuscada, String rutaArchivo) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(rutaArchivo))) {
-            String linea;
-            boolean isFirstLine = true; // Ignorar encabezados
-
-            while ((linea = reader.readLine()) != null) {
-                if (isFirstLine) {
-                    isFirstLine = false;
-                    continue;
-                }
-
-                // Separar columnas por delimitador punto y coma
-                String[] columnas = linea.split(";");
-
-                // Comparar valor de "orden" en la primera columna
-                if (columnas[0].trim().equals(ordenBuscada.trim())) {
-                    return true; // Devuelve los datos de la línea
-                }
+    try (BufferedReader reader = new BufferedReader(new FileReader(rutaArchivo))) {
+        String linea;
+        boolean isFirstLine = true; // Ignorar encabezados
+        while ((linea = reader.readLine()) != null) {
+            if (isFirstLine) {
+                isFirstLine = false;
+                continue;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            String[] columnas = linea.split(";"); // Cambiar el delimitador si es necesario
+            if (columnas[0].trim().equals(ordenBuscada.trim())) {
+                return true;
+            }
         }
-
-        return false; // Si no se encuentra la orden, devuelve null
+    } catch (IOException e) {
+        e.printStackTrace();
     }
+    return false;
+}
 
  public static void Cambiarorden(String archivoCsv, String valorOrden, String caracterAgregar) throws IOException {
     // Leer todas las líneas del archivo CSV usando una codificación explícita
@@ -249,7 +251,7 @@ public class Interfaz extends JFrame {
                     }
 
                     // Separar columnas por delimitador punto y coma
-                    String[] columnas = linea.split(";");
+                    String[] columnas = linea.split(",");
                     if (columnas[0].trim().equals(orden.trim())) {
                         for (int i = 0; i < columnas.length; i++) {
                             columnas[i] = columnas[i].replace(",", "."); // Reemplazar comas por puntos
