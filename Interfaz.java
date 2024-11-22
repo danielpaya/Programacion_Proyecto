@@ -178,7 +178,6 @@ public class Interfaz extends JFrame {
     private void actualizarEstadoHabitacion(String numhabitacion, String orden, JButton boton, Habitaciones habitacion) {
         Window ventanaActual = SwingUtilities.getWindowAncestor(boton);
     
-        // Verificar si la orden ya está asociada a otra habitación
         if (ordenesAsignadas.containsKey(orden)) {
             String habitacionAsociada = ordenesAsignadas.get(orden);
             if (!habitacionAsociada.equals(numhabitacion)) {
@@ -188,21 +187,14 @@ public class Interfaz extends JFrame {
             }
         }
     
-        if (!habitacion.ocupada) { // Si la habitación está libre
+        if (!habitacion.ocupada) {
             String[] datosOrden = null;
     
             try (BufferedReader reader = new BufferedReader(new FileReader(CSV_HOSPITALIZACION))) {
                 String linea;
-                boolean isFirstLine = true;
-    
                 while ((linea = reader.readLine()) != null) {
-                    if (isFirstLine) {
-                        isFirstLine = false;
-                        continue;
-                    }
-    
-                    String[] columnas = linea.split(",");
-                    if (columnas[0].trim().equals(orden.trim())) { // Buscar orden en el CSV
+                    String[] columnas = linea.split(";");
+                    if (columnas[0].trim().equals(orden.trim())) {
                         datosOrden = columnas;
                         break;
                     }
@@ -214,31 +206,27 @@ public class Interfaz extends JFrame {
             }
     
             if (datosOrden != null) {
-                habitacion.Llenar(datosOrden); // Llenar los datos de la habitación
+                habitacion.Llenar(datosOrden);
                 habitacion.numhabitacion = numhabitacion;
-    
-                // Registrar la orden asociada a la habitación
                 ordenesAsignadas.put(orden, numhabitacion);
     
-                // Cambiar el estado del botón y mostrar éxito
                 boton.setBackground(Color.RED);
                 JOptionPane.showMessageDialog(ventanaActual, "HOSPITALIZACIÓN EXITOSA");
                 habitacion.ocupada = true;
                 habitacion.orden = orden;
     
-                // Registrar fecha de ingreso
                 LocalDateTime fechaActual = LocalDateTime.now();
                 DateTimeFormatter formato = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 String fechaHora = fechaActual.format(formato);
                 habitacion.setIngreso(fechaHora);
     
-                // Guardar datos en el CSV
+                // Actualizar CSV y registrar en historial clínico
                 actualizarCSVsalida(CSV_HOSPITALIZACION, habitacion);
-    
+                agregarAHistorialClinico(habitacion);
             } else {
                 JOptionPane.showMessageDialog(ventanaActual, "Orden no encontrada en el archivo.");
             }
-        } else { // Si la habitación está ocupada, gestionar salida
+        } else {
             if (habitacion.orden.equals(orden)) {
                 int option = JOptionPane.showConfirmDialog(
                     ventanaActual, "¿Está seguro de realizar la salida?", 
@@ -248,28 +236,24 @@ public class Interfaz extends JFrame {
                 if (option == JOptionPane.YES_OPTION) {
                     boton.setBackground(Color.GREEN);
                     JOptionPane.showMessageDialog(ventanaActual, "SALIDA EXITOSA");
-                
-                    // Registrar la fecha de salida
+    
                     LocalDateTime fechaActual = LocalDateTime.now();
                     DateTimeFormatter formato = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                     String fechaHora = fechaActual.format(formato);
                     habitacion.setSalida(fechaHora);
+    
                     tiempohosp(habitacion);
-                
-                    // Actualizar el historial clínico con el alta
-                    actualizarHistorialClinicoConAlta(habitacion);
-                
-                    // Eliminar el paciente del CSV (No guardar datos de la habitación después de vaciarla)
+    
+                    // Actualizar historial clínico con el alta
+                    agregarAHistorialClinicoConAlta(habitacion);
+    
+                    // Eliminar paciente del CSV
                     eliminarPacienteDelCSV(habitacion.orden);
-                
-                    // Limpiar los datos de la habitación (no afecta el CSV)
+    
                     habitacion.Vaciar();
                     habitacion.ocupada = false;
-                
-                    // Eliminar la asignación de la orden
                     ordenesAsignadas.remove(orden);
                 }
-                         
             } else {
                 JOptionPane.showMessageDialog(ventanaActual, 
                     "Con esta orden no puede deshospitalizar a este paciente.");
@@ -277,51 +261,29 @@ public class Interfaz extends JFrame {
         }
     }
     
-    public void eliminarPacienteDelCSV(String orden) {
-        File archivoOriginal = new File(CSV_HOSPITALIZACION);
-        File archivoTemporal = new File("temp_" + CSV_HOSPITALIZACION);
+    private void eliminarPacienteDelCSV(String orden) {
+        ArrayList<String> lineas = new ArrayList<>();
     
-        try (BufferedReader reader = new BufferedReader(new FileReader(archivoOriginal));
-             BufferedWriter writer = new BufferedWriter(new FileWriter(archivoTemporal))) {
-    
+        try (BufferedReader reader = new BufferedReader(new FileReader(CSV_HOSPITALIZACION))) {
             String linea;
-            boolean encabezado = true;
-    
             while ((linea = reader.readLine()) != null) {
-                if (encabezado) {
-                    // Escribir encabezado en el archivo temporal
-                    writer.write(linea);
-                    writer.newLine();
-                    encabezado = false;
-                    continue;
-                }
-    
-                String[] columnas = linea.split(",");
-                if (!columnas[0].equals(orden)) {
-                    // Escribir solo las líneas cuyo orden no coincide
-                    writer.write(linea);
-                    writer.newLine();
+                if (!linea.contains(orden)) {
+                    lineas.add(linea);
                 }
             }
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error al eliminar el paciente: " + e.getMessage());
             e.printStackTrace();
-            return;
         }
     
-        // Reemplazar el archivo original por el temporal
-        if (!archivoOriginal.delete()) {
-            JOptionPane.showMessageDialog(this, "Error al eliminar el archivo original.");
-            return;
-        }
-    
-        if (!archivoTemporal.renameTo(archivoOriginal)) {
-            JOptionPane.showMessageDialog(this, "Error al renombrar el archivo temporal.");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_HOSPITALIZACION, false))) {
+            for (String linea : lineas) {
+                writer.write(linea);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
-    
-
-    
 
     private void Colorhabitacion(JButton boton, Habitaciones habitacion) {
         // Cambiar el color del botón y mostrar mensaje según el estado de 'ocupada'
@@ -363,7 +325,7 @@ public class Interfaz extends JFrame {
     // Botón Actualizar Historial Clínico
     JButton actualizarHistorialButton = new JButton("Actualizar Historial Clínico");
     actualizarHistorialButton.addActionListener(e -> {
-        actualizarHistorialClinico(habitacion); // Llama al método para actualizar el historial
+        agregarAHistorialClinico(habitacion); // Llama al método para actualizar el historial
     });
 
     // Agregar los botones al panel
@@ -797,81 +759,35 @@ public class Interfaz extends JFrame {
         add(mainPanel);
     }
 // Metodo para actualizar el historial clinico del paciente
-    private void actualizarHistorialClinico(Habitaciones habitacion) {
-        // Validar que la habitación esté ocupada
-        if (!habitacion.ocupada) {
-            JOptionPane.showMessageDialog(null, "No hay paciente en esta habitación.");
-            return;
+private void agregarAHistorialClinico(Habitaciones habitacion) {
+    String archivoHistorial = habitacion.cedula + "_historial.csv";
+    File file = new File(archivoHistorial);
+
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+        if (!file.exists() || file.length() == 0) {
+            writer.write("Fecha/Hora\tLugar\tObservaciones\n"); // Encabezado
         }
-    
-        // Crear un cuadro de diálogo para ingresar observaciones
-        String observaciones = JOptionPane.showInputDialog(
-            null, 
-            "Ingrese las observaciones para el historial clínico del paciente:", 
-            "Actualizar Historial Clínico", 
-            JOptionPane.PLAIN_MESSAGE
-        );
-    
-        if (observaciones == null || observaciones.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "No se ingresaron observaciones.");
-            return;
-        }
-    
-        // Actualizar el historial clínico del paciente
-        String archivoHistorial = habitacion.cedula + "_historial.csv"; // Archivo personal del paciente
-    
-        try (BufferedReader reader = new BufferedReader(new FileReader(archivoHistorial));
-             BufferedWriter writer = new BufferedWriter(new FileWriter("temp_" + archivoHistorial))) {
-    
-            String linea;
-            boolean isFirstLine = true;
-    
-            while ((linea = reader.readLine()) != null) {
-                if (isFirstLine) {
-                    writer.write(linea); // Escribir encabezado
-                    writer.newLine();
-                    isFirstLine = false;
-                    continue;
-                }
-    
-                String[] columnas = linea.split(",");
-                if (columnas.length > 0 && columnas[0].equals(habitacion.orden)) {
-                    // Agregar observaciones al registro del paciente
-                    columnas[columnas.length - 1] = observaciones; // Última columna: Observaciones
-                    writer.write(String.join(",", columnas));
-                } else {
-                    writer.write(linea); // Escribir registros no modificados
-                }
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Error al actualizar el historial: " + e.getMessage());
-            e.printStackTrace();
-            return;
-        }
-    
-        // Reemplazar archivo original por el temporal
-        File archivoOriginal = new File(archivoHistorial);
-        File archivoTemporal = new File("temp_" + archivoHistorial);
-        if (!archivoOriginal.delete() || !archivoTemporal.renameTo(archivoOriginal)) {
-            JOptionPane.showMessageDialog(null, "Error al guardar el historial actualizado.");
-        } else {
-            JOptionPane.showMessageDialog(null, "Historial clínico actualizado con éxito.");
-        }
+
+        String fechaHora = habitacion.ingreso;
+        writer.write(fechaHora + "\tHospitalización\tIngreso a habitación: " + habitacion.numhabitacion + "\n");
+    } catch (IOException e) {
+        e.printStackTrace();
     }
+}
+
+
     // Metodo para que automaticamente se ponga en el historial del paciente que se le dio de alta
-    private void actualizarHistorialClinicoConAlta(Habitaciones habitacion) {
-        String archivoHistorial = habitacion.cedula +"_historial.csv";
-        String observacionAlta = "Paciente dado de alta el " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    private void agregarAHistorialClinicoConAlta(Habitaciones habitacion) {
+        String archivoHistorial = habitacion.cedula + "_historial.csv";
     
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(archivoHistorial, true))) {
-            writer.newLine(); // Escribir nueva línea
-            writer.write(habitacion.orden + "," + observacionAlta);
+            String fechaHora = habitacion.salida;
+            writer.write(fechaHora + "\tHospitalización\tAlta de habitación: " + habitacion.numhabitacion + "\n");
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Error al registrar alta en el historial clínico: " + e.getMessage());
             e.printStackTrace();
         }
     }
+    
     
 
     public static void main(String[] args) {

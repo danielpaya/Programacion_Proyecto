@@ -3,6 +3,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.plaf.basic.BasicOptionPaneUI;
 
 public class Hospital {
 
@@ -22,12 +23,21 @@ public class Hospital {
     // Ventana principal de Laboratorio
     public static void openLaboratorioWindow() {
         JFrame laboratorioFrame = new JFrame("Laboratorio");
-        laboratorioFrame.setSize(600, 500);
+        laboratorioFrame.setSize(800, 600); // Ajustar tamaño para incluir imagen y botones
         laboratorioFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        laboratorioFrame.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20));
-
+        laboratorioFrame.setLayout(new BorderLayout());
+    
         laboratorioFrame.getContentPane().setBackground(new Color(240, 248, 255));
-
+    
+        // Cargar la imagen
+        ImageIcon logoImage = new ImageIcon("c:\\Users\\santiago\\Documents\\JAVA pOO\\LOGO.jpg"); // Ruta de la imagen
+        Image scaledImage = logoImage.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH); // Escalar imagen
+        JLabel logoLabel = new JLabel(new ImageIcon(scaledImage), SwingConstants.CENTER);
+    
+        // Panel para los botones
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new GridLayout(4, 1, 10, 10)); // Organizar los botones verticalmente
+    
         // Botón Exámenes de Sangre
         JButton btnExamenesSangre = new JButton("Exámenes de Sangre");
         btnExamenesSangre.setPreferredSize(new Dimension(250, 60));
@@ -36,7 +46,7 @@ public class Hospital {
         btnExamenesSangre.setFont(new Font("Arial", Font.BOLD, 20));
         btnExamenesSangre.setFocusPainted(false);
         btnExamenesSangre.setBorder(BorderFactory.createRaisedBevelBorder());
-
+    
         // Botón Historial
         JButton btnHistorial = new JButton("Historial");
         btnHistorial.setPreferredSize(new Dimension(250, 60));
@@ -45,7 +55,7 @@ public class Hospital {
         btnHistorial.setFont(new Font("Arial", Font.BOLD, 20));
         btnHistorial.setFocusPainted(false);
         btnHistorial.setBorder(BorderFactory.createRaisedBevelBorder());
-
+    
         // Botón Radiografías
         JButton btnRadiografias = new JButton("Radiografías");
         btnRadiografias.setPreferredSize(new Dimension(250, 60));
@@ -54,7 +64,7 @@ public class Hospital {
         btnRadiografias.setFont(new Font("Arial", Font.BOLD, 20));
         btnRadiografias.setFocusPainted(false);
         btnRadiografias.setBorder(BorderFactory.createRaisedBevelBorder());
-
+    
         // Botón Salir
         JButton btnSalir = new JButton("Salir");
         btnSalir.setPreferredSize(new Dimension(250, 60));
@@ -63,51 +73,57 @@ public class Hospital {
         btnSalir.setFont(new Font("Arial", Font.BOLD, 20));
         btnSalir.setFocusPainted(false);
         btnSalir.setBorder(BorderFactory.createRaisedBevelBorder());
-
-        // Acción para el botón de Exámenes de Sangre
+    
+        // Agregar acciones a los botones
         btnExamenesSangre.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 laboratorioFrame.dispose();
-                openSeleccionarPacienteWindow(); // Cambiar para abrir ventana de seleccionar paciente
+                openSeleccionarPacienteWindow();
             }
         });
-
-        // Acción para el botón de Historial
+    
         btnHistorial.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 openHistorialWindow();
             }
         });
-
-        // Acción para el botón de Radiografías
+    
         btnRadiografias.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 laboratorioFrame.dispose();
-                openSeleccionarPacienteParaRadiografias(); // Cambiar para abrir ventana de radiografías
+                openSeleccionarPacienteParaRadiografias();
             }
         });
-        
-        
-        // Acción para el botón de Salir (cerrar la aplicación)
+    
         btnSalir.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int response = JOptionPane.showConfirmDialog(laboratorioFrame, "¿Estás seguro que deseas salir?", "Confirmación de Salida", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                int response = JOptionPane.showConfirmDialog(
+                    laboratorioFrame,
+                    "¿Estás seguro que deseas salir?",
+                    "Confirmación de Salida",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE
+                );
                 if (response == JOptionPane.YES_OPTION) {
-                    System.exit(0); // Cerrar la aplicación
+                    System.exit(0);
                 }
             }
         });
-
-        // Agregar los botones a la ventana
-        laboratorioFrame.add(btnExamenesSangre);
-        laboratorioFrame.add(btnHistorial);
-        laboratorioFrame.add(btnRadiografias);
-        laboratorioFrame.add(btnSalir);
-
+    
+        // Agregar botones al panel
+        buttonPanel.add(btnExamenesSangre);
+        buttonPanel.add(btnHistorial);
+        buttonPanel.add(btnRadiografias);
+        buttonPanel.add(btnSalir);
+    
+        // Agregar imagen y botones al marco
+        laboratorioFrame.add(logoLabel, BorderLayout.NORTH); // Imagen en la parte superior
+        laboratorioFrame.add(buttonPanel, BorderLayout.CENTER); // Botones en el centro
+    
         laboratorioFrame.setVisible(true);
     }
 

@@ -233,7 +233,7 @@ public class Habitaciones {
     }
 
     public void Llenar(String[] datos) {
-        if (datos.length >= 13) {
+        if (datos.length >= 13) { // Asegúrate de que esta condición sea correcta
             this.orden = datos[0];
             this.cedula = Integer.parseInt(datos[1]);
             this.paciente = datos[2];
@@ -245,8 +245,12 @@ public class Habitaciones {
             this.saturacioni = Double.parseDouble(datos[10]);
             this.observaciones = datos[11];
             this.tiempo = datos[12];
+        } else {
+            System.err.println("Error: Los datos no son suficientes para llenar la habitación.");
         }
     }
+    
+
     
     
 

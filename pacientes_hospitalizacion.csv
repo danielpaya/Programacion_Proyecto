@@ -1,4 +1,2 @@
-
-1,NI-20186,N/A,N/A,N/A,Accidente de trafico,32,32,2,23.0,23,No se hicieron observaciones,5
-2,NI-3628,N/A,N/A,N/A,Accidente de trafico,342,432,342,324.0,432,No se hicieron observaciones,5
-3,NI-26545,N/A,N/A,N/A,Accidente de trafico,54,54,54,54.0,54,No se hicieron observaciones,7
+1;NI-3628;N/A N/A;342;N/A;432/342;324.0;432;Accidente de trafico
+2;NI-20186;N/A N/A;32;N/A;32/2;23.0;23;Accidente de trafico

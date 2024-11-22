@@ -487,16 +487,14 @@ public class MedicinaGeneral extends JFrame {
             try {
                 int dias = Integer.parseInt(diasField.getText());
                 if (dias > 0) {
-                    // Abrir el archivo para escritura
                     File file = new File("pacientes_hospitalizacion.csv");
                     int nextId = 1; // ID inicial
 
-                    // Calcular el siguiente ID directamente en este método
                     if (file.exists()) {
                         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                             String line;
                             while ((line = reader.readLine()) != null) {
-                                String[] datos = line.split(",");
+                                String[] datos = line.split(";");
                                 if (datos.length > 0) {
                                     try {
                                         int currentId = Integer.parseInt(datos[0].trim());
@@ -516,51 +514,24 @@ public class MedicinaGeneral extends JFrame {
 
                     try (FileWriter writer = new FileWriter(file, true)) {
                         if (triageTable.getSelectedRow() != -1) {
-                            // Paciente de urgencias
                             String documento = documentoField.getText();
                             String nombre = nombreField.getText();
                             String apellido = apellidoField.getText();
                             String eps = epsField.getText();
-                            String motivoConsulta = motivoConsultaArea.getText();
                             String frecuencia = frecuenciaField.getText();
                             String sistolica = sistolicaField.getText();
                             String diastolica = diastolicaField.getText();
                             String temperatura = temperaturaField.getText();
                             String saturacion = saturacionField.getText();
-                            String observaciones = observacionesArea.getText();
-
-                            // Escribir en el archivo CSV
-                            writer.write(nextId + "," + documento + "," + nombre + "," + apellido + "," +
-                                    eps + "," + motivoConsulta + "," + frecuencia + "," +
-                                    sistolica + "," + diastolica + "," + temperatura + "," +
-                                    saturacion + "," + observaciones + "," + dias + "\n");
-                            JOptionPane.showMessageDialog(this, "Paciente de urgencias registrado para hospitalización.");
-                        } else if (consultaTable.getSelectedRow() != -1) {
-                            // Paciente de consulta
-                            int selectedRow = consultaTable.getSelectedRow();
-                            String documento = (String) consultaTableModel.getValueAt(selectedRow, 0);
-                            String nombre = (String) consultaTableModel.getValueAt(selectedRow, 1);
-                            String apellido = (String) consultaTableModel.getValueAt(selectedRow, 2);
-
-                            // Obtener datos del panel izquierdo
-                            String eps = epsField.getText();
                             String motivoConsulta = motivoConsultaArea.getText();
-                            String frecuencia = frecuenciaField.getText();
-                            String sistolica = sistolicaField.getText();
-                            String diastolica = diastolicaField.getText();
-                            String temperatura = temperaturaField.getText();
-                            String saturacion = saturacionField.getText();
-                            String observaciones = observacionesArea.getText();
 
-                            // Escribir en el archivo CSV
-                            writer.write(nextId + "," + documento + "," + nombre + "," + apellido + "," +
-                                    eps + "," + motivoConsulta + "," + frecuencia + "," +
-                                    sistolica + "," + diastolica + "," + temperatura + "," +
-                                    saturacion + "," + observaciones + "," + dias + "\n");
-                            JOptionPane.showMessageDialog(this, "Paciente de consulta registrado para hospitalización.");
+                            // Escribir en formato separado por punto y coma
+                            writer.write(nextId + ";" + documento + ";" + nombre + " " + apellido + ";" +
+                                    frecuencia + ";" + "N/A" + ";" + sistolica + "/" + diastolica + ";" +
+                                    temperatura + ";" + saturacion + ";" + motivoConsulta + "\n");
+                            JOptionPane.showMessageDialog(this, "Paciente registrado para hospitalización.");
                         } else {
                             JOptionPane.showMessageDialog(this, "No se ha seleccionado un paciente.");
-                            return;
                         }
 
                         dialog.dispose();
@@ -869,32 +840,7 @@ private void mostrarVentanaHistorialClinico() {
                 JOptionPane.showMessageDialog(this, "Error al buscar detalles del paciente: " + e.getMessage());
             }
         }
-    }
-    // Metodo para que se actualice el historial en la tabla
-    private void cargarHistorialEnTabla(File historialFile, JTable historialTable) {
-        DefaultTableModel modeloTabla = (DefaultTableModel) historialTable.getModel();
-        modeloTabla.setRowCount(0); // Limpiar cualquier dato previo en la tabla
-    
-        try (BufferedReader reader = new BufferedReader(new FileReader(historialFile))) {
-            String linea;
-            boolean isFirstLine = true;
-    
-            while ((linea = reader.readLine()) != null) {
-                if (isFirstLine) {
-                    // Ignorar encabezado en el archivo CSV si existe
-                    isFirstLine = false;
-                    continue;
-                }
-                String[] datos = linea.split(","); // Dividir por comas
-                if (datos.length >= 3) {
-                    modeloTabla.addRow(new Object[]{datos[0], datos[1], datos[2]}); // Agregar fila a la tabla
-                }
-            }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Error al cargar el historial clínico: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    
+    } 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MedicinaGeneral::new);
     }
