@@ -1,3 +1,7 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -15,23 +19,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-
 import java.time.Duration;
 
 public class Interfaz extends JFrame {
     public static String entrada = "pacientes_hospitalizacion.csv";
-    public static String salida = "C:/PERSONAL/UNIVERSIDAD/SEGUNDO SEMESTRE/POO/TERCER CORTE/PROYECTO FINAL HOSPITALIZACION/INFORME DE PERSONAS HOSPITALIZADA.csv";
+    public static String salida = "informe_hospitalizacion.csv";
 
     public static void tiempohosp(Habitaciones habitacion) {    
         // Formateador para convertir las cadenas en LocalDateTime
@@ -59,81 +51,44 @@ public class Interfaz extends JFrame {
     }
 
     public static void actualizarCSVsalida(String archivo, Habitaciones habitacion) {
-        if (habitacion.ocupada) {
-            ArrayList<String> lineas = new ArrayList<>();
-            boolean ordenEncontrada = false;
+        ArrayList<String> lineas = new ArrayList<>();
+        boolean ordenEncontrada = false;
     
-            // Leer el contenido actual del archivo CSV
-            try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
-                String linea;
-                while ((linea = reader.readLine()) != null) {
-                    // Dividir la línea por ";" para verificar el atributo "orden"
-                    String[] datos = linea.split(";");
-                    if (datos.length > 18 && datos[18].equals(habitacion.orden)) {
-                        // Sobrescribir la línea si la orden coincide
-                        linea = habitacion.cedula + ";" +
-                                habitacion.paciente + ";" +
-                                habitacion.fcardiacai + ";" +
-                                habitacion.frespiratoriai + ";" +
-                                habitacion.presioni + ";" +
-                                habitacion.temperaturai + ";" +
-                                habitacion.saturacioni + ";" +
-                                habitacion.patologia + ";" +
-                                habitacion.fcardiacaf + ";" +
-                                habitacion.frespiratoriaf + ";" +
-                                habitacion.presionf + ";" +
-                                habitacion.temperaturaf + ";" +
-                                habitacion.saturacionf + ";" +
-                                habitacion.ingreso + ";" +
-                                habitacion.ultrevision + ";" +
-                                habitacion.salida + ";" +
-                                habitacion.tiempo + ";" +
-                                habitacion.numhabitacion + ";" +
-                                habitacion.orden;
-                        ordenEncontrada = true;
-                    }
-                    lineas.add(linea);
+        try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
+            String linea;
+    
+            while ((linea = reader.readLine()) != null) {
+                String[] datos = linea.split(";");
+                if (datos.length > 0 && datos[0].equals(habitacion.orden)) {
+                    linea = habitacion.orden + ";" + habitacion.cedulaStr + ";" + habitacion.paciente + ";" +
+                            habitacion.fcardiacai + ";" + habitacion.frespiratoriai + ";" +
+                            habitacion.presioni + ";" + habitacion.temperaturai + ";" +
+                            habitacion.saturacioni + ";" + habitacion.patologia;
+                    ordenEncontrada = true;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+                lineas.add(linea);
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     
-            // Si la orden no se encontró, agregar una nueva línea
-            if (!ordenEncontrada) {
-                lineas.add(
-                    habitacion.cedula + ";" +
-                    habitacion.paciente + ";" +
-                    habitacion.fcardiacai + ";" +
-                    habitacion.frespiratoriai + ";" +
-                    habitacion.presioni + ";" +
-                    habitacion.temperaturai + ";" +
-                    habitacion.saturacioni + ";" +
-                    habitacion.patologia + ";" +
-                    habitacion.fcardiacaf + ";" +
-                    habitacion.frespiratoriaf + ";" +
-                    habitacion.presionf + ";" +
-                    habitacion.temperaturaf + ";" +
-                    habitacion.saturacionf + ";" +
-                    habitacion.ingreso + ";" +
-                    habitacion.ultrevision + ";" +
-                    habitacion.salida + ";" +
-                    habitacion.tiempo + ";" +
-                    habitacion.numhabitacion + ";" +
-                    habitacion.orden
-                );
-            }
+        if (!ordenEncontrada) {
+            lineas.add(habitacion.orden + ";" + habitacion.cedulaStr + ";" + habitacion.paciente + ";" +
+                    habitacion.fcardiacai + ";" + habitacion.frespiratoriai + ";" +
+                    habitacion.presioni + ";" + habitacion.temperaturai + ";" +
+                    habitacion.saturacioni + ";" + habitacion.patologia);
+        }
     
-            // Escribir el contenido actualizado de vuelta al archivo
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(archivo, false))) {
-                for (String linea : lineas) {
-                    writer.write(linea);
-                    writer.newLine();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(archivo))) {
+            for (String linea : lineas) {
+                writer.write(linea);
+                writer.newLine();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
+    
        
 
     // Método para generar un valor aleatorio dentro de un rango dado
@@ -171,12 +126,17 @@ public class Interfaz extends JFrame {
     try (BufferedReader reader = new BufferedReader(new FileReader(rutaArchivo))) {
         String linea;
         boolean isFirstLine = true; // Ignorar encabezados
+
         while ((linea = reader.readLine()) != null) {
             if (isFirstLine) {
                 isFirstLine = false;
                 continue;
             }
-            String[] columnas = linea.split(";"); // Cambiar el delimitador si es necesario
+
+            // Separar columnas por delimitador punto y coma
+            String[] columnas = linea.split(";");
+
+            // Comparar valor de "orden" en la columna 0
             if (columnas[0].trim().equals(ordenBuscada.trim())) {
                 return true;
             }
@@ -184,8 +144,9 @@ public class Interfaz extends JFrame {
     } catch (IOException e) {
         e.printStackTrace();
     }
-    return false;
+    return false; // Si no se encuentra la orden
 }
+
 
  public static void Cambiarorden(String archivoCsv, String valorOrden, String caracterAgregar) throws IOException {
     // Leer todas las líneas del archivo CSV usando una codificación explícita
@@ -224,7 +185,7 @@ public class Interfaz extends JFrame {
     private void actualizarEstadoHabitacion(String numhabitacion, String orden, JButton boton, Habitaciones habitacion) {
         // Obtener la ventana contenedora del botón
         Window ventanaActual = SwingUtilities.getWindowAncestor(boton);
-
+    
         // Verificar si la orden ya está asociada a una habitación diferente
         if (ordenesAsignadas.containsKey(orden)) {
             String habitacionAsociada = ordenesAsignadas.get(orden);
@@ -234,28 +195,24 @@ public class Interfaz extends JFrame {
                 return;
             }
         }
-
+    
         if (!habitacion.ocupada) {
             // Leer el archivo CSV para buscar la orden
-            String rutaArchivo =entrada;
             String[] datosOrden = null;
-
-            try (BufferedReader reader = new BufferedReader(new FileReader(rutaArchivo))) {
+    
+            try (BufferedReader reader = new BufferedReader(new FileReader(entrada))) {
                 String linea;
                 boolean isFirstLine = true; // Ignorar encabezados
-
+    
                 while ((linea = reader.readLine()) != null) {
                     if (isFirstLine) {
                         isFirstLine = false;
                         continue;
                     }
-
+    
                     // Separar columnas por delimitador punto y coma
-                    String[] columnas = linea.split(",");
-                    if (columnas[0].trim().equals(orden.trim())) {
-                        for (int i = 0; i < columnas.length; i++) {
-                            columnas[i] = columnas[i].replace(",", "."); // Reemplazar comas por puntos
-                        }
+                    String[] columnas = linea.split(";");
+                    if (columnas[0].trim().equals(orden.trim())) { // Compara la columna de orden
                         datosOrden = columnas;
                         break;
                     }
@@ -265,29 +222,29 @@ public class Interfaz extends JFrame {
                 e.printStackTrace();
                 return;
             }
-
+    
             if (datosOrden != null) {
+                // Llenar los datos de la habitación con los valores del CSV
                 habitacion.Llenar(datosOrden);
                 habitacion.numhabitacion = numhabitacion;
-
+    
                 // Registrar la orden asociada a esta habitación
                 ordenesAsignadas.put(orden, numhabitacion);
-
+    
                 // Cambiar el estado y mostrar éxito
                 boton.setBackground(Color.RED);
                 JOptionPane.showMessageDialog(ventanaActual, "HOSPITALIZACIÓN EXITOSA");
                 habitacion.ocupada = true;
                 habitacion.orden = orden;
-
+    
                 // Registrar fecha de ingreso
                 LocalDateTime fechaActual = LocalDateTime.now();
                 DateTimeFormatter formato = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 String fechaHora = fechaActual.format(formato);
                 habitacion.setIngreso(fechaHora);
+    
+                // Actualizar el archivo de salida
                 actualizarCSVsalida(salida, habitacion);
-                if (ventanaActual != null) {
-                    ventanaActual.dispose();
-                }
             } else {
                 JOptionPane.showMessageDialog(ventanaActual, "Orden no encontrada en el archivo.");
             }
@@ -297,14 +254,13 @@ public class Interfaz extends JFrame {
                     ventanaActual, "¿Está seguro de realizar la salida?", 
                     "Confirmar salida", JOptionPane.YES_NO_OPTION
                 );
-
+    
                 if (option == JOptionPane.YES_OPTION) {
+                    // Cambiar el color del botón a verde
                     boton.setBackground(Color.GREEN);
                     JOptionPane.showMessageDialog(ventanaActual, "SALIDA EXITOSA");
-
-                    // Liberar habitación
-                    
-
+    
+                    // Actualizar la orden en el archivo
                     try {
                         Cambiarorden(entrada, orden, "usada");
                     } catch (IOException e) {
@@ -313,22 +269,25 @@ public class Interfaz extends JFrame {
                         e.printStackTrace();
                         return;
                     }
-
+    
                     // Registrar fecha de salida
                     LocalDateTime fechaActual = LocalDateTime.now();
                     DateTimeFormatter formato = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                     String fechaHora = fechaActual.format(formato);
                     habitacion.setSalida(fechaHora);
+    
+                    // Calcular tiempo de hospitalización
                     tiempohosp(habitacion);
+    
+                    // Actualizar el archivo de salida con los datos finales
                     actualizarCSVsalida(salida, habitacion);
+    
+                    // Vaciar los datos de la habitación
                     habitacion.Vaciar();
                     habitacion.ocupada = false;
+    
                     // Eliminar la asociación de la orden
                     ordenesAsignadas.remove(orden);
-
-                    if (ventanaActual != null) {
-                        ventanaActual.dispose();
-                    }
                 } else {
                     JOptionPane.showMessageDialog(ventanaActual, "Operación cancelada.");
                 }
@@ -338,12 +297,7 @@ public class Interfaz extends JFrame {
             }
         }
     }
-
-
     
-    
-    
-
     private void Colorhabitacion(JButton boton, Habitaciones habitacion) {
         // Cambiar el color del botón y mostrar mensaje según el estado de 'ocupada'
         if (habitacion.ocupada) {

@@ -2,7 +2,7 @@ public class Habitaciones {
     boolean ocupada = false;
     String numhabitacion=null;
     String orden= null;
-    int cedula = 0;
+    String cedulaStr = null;
     String paciente = null;
     String ingreso = null;
     double fcardiacai = 0;
@@ -43,14 +43,14 @@ public class Habitaciones {
     }
 
     // Getter y Setter para cedula
-    public int getCedula() {
-        return cedula;
+    public String getCedula() {
+        return cedulaStr; // Ahora devuelve la cédula como String
     }
-
-    public void setCedula(int cedula) {
-        this.cedula = cedula;
+    
+    public void setCedula(String cedulaStr) {
+        this.cedulaStr = cedulaStr; // Permite asignar valores alfanuméricos
     }
-
+    
     // Getter y Setter para paciente
     public String getPaciente() {
         return paciente;
@@ -184,18 +184,18 @@ public class Habitaciones {
 
     // Método para imprimir los datos
     public String imprimirDatos() {
-        return"Orden: "+orden+ "\n"+
-        "Cédula: " + cedula + "\n" +
-       "Paciente: " + paciente + "\n" +
-       "Fecha de Ingreso: " + ingreso + "\n" +
-       "Frecuencia Cardiaca inicial: " + fcardiacai + " lpm"+"\n" +
-       "Frecuencia Respiratoria inicial: " + frespiratoriai + " rpm" +"\n" +
-       "Presión inicial: " + presioni + " mmHg" + "\n" +
-       "Temperatura inicial: " + temperaturai + " °C" + "\n" +
-       "Saturación inicial: " + saturacioni + " %" +"\n" +
-       "Patología: " + patologia;
-
+        return "Orden: " + orden + "\n" +
+               "Cédula: " + cedulaStr + "\n" +
+               "Paciente: " + paciente + "\n" +
+               "Fecha de Ingreso: " + ingreso + "\n" +
+               "Frecuencia Cardiaca inicial: " + fcardiacai + " lpm\n" +
+               "Frecuencia Respiratoria inicial: " + frespiratoriai + " rpm\n" +
+               "Presión inicial: " + presioni + " mmHg\n" +
+               "Temperatura inicial: " + temperaturai + " °C\n" +
+               "Saturación inicial: " + saturacioni + " %\n" +
+               "Patología: " + patologia;
     }
+    
     // Método para imprimir los datos finales
 public String imprimirDatosFinales() {
     return 
@@ -211,7 +211,7 @@ public String imprimirDatosFinales() {
         this.numhabitacion=null;
         this.orden=null;
         this.ocupada = false;
-        this.cedula = 0;
+        this.cedulaStr = null;
         this.paciente =null ;
         this.ingreso = null;
         this.fcardiacai = 0;
@@ -223,19 +223,28 @@ public String imprimirDatosFinales() {
         
     }
     public void Llenar(String[] datos) {
-        this.cedula = datos[1].isEmpty() ? null : Integer.parseInt(datos[1]);
+        this.orden = datos[0]; // Orden
+        this.cedulaStr = datos[1]; // La cédula ahora es String, puede manejar valores alfanuméricos como "N/A"
         this.paciente = datos[2].isEmpty() ? null : datos[2];
-        this.fcardiacai = datos[3].isEmpty() ? 0 : Double.parseDouble(datos[3]);
-        this.frespiratoriai = datos[4].isEmpty() ? 0 : Double.parseDouble(datos[4]);
-        this.presioni = datos[5].isEmpty() ? 0 : Double.parseDouble(datos[5]);
-        this.temperaturai = datos[6].isEmpty() ? 0 : Double.parseDouble(datos[6]);
-        this.saturacioni = datos[7].isEmpty() ? 0 : Double.parseDouble(datos[7]);
+        this.fcardiacai = parseDoubleOrDefault(datos[3], 0.0);
+        this.frespiratoriai = parseDoubleOrDefault(datos[4], 0.0);
+        this.presioni = parseDoubleOrDefault(datos[5], 0.0);
+        this.temperaturai = parseDoubleOrDefault(datos[6], 0.0);
+        this.saturacioni = parseDoubleOrDefault(datos[7], 0.0);
         this.patologia = datos[8].isEmpty() ? null : datos[8];
-        this.fcardiacaf=fcardiacai;
-        this.frespiratoriaf=frespiratoriai;
-        this.presionf=presioni;
-        this.saturacionf=saturacioni;
-        this.ultrevision="Aun no se ha realizado una nueva revision";
-       
+        this.fcardiacaf = fcardiacai;
+        this.frespiratoriaf = frespiratoriai;
+        this.presionf = presioni;
+        this.saturacionf = saturacioni;
+        this.ultrevision = "Aun no se ha realizado una nueva revision";
     }
+    
+    private double parseDoubleOrDefault(String value, double defaultValue) {
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException | NullPointerException e) {
+            return defaultValue; // Si falla la conversión, devuelve el valor por defecto
+        }
+    }
+    
 }

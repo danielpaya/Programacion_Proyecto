@@ -84,6 +84,7 @@ public class MedicinaGeneral extends JFrame {
         observacionesArea.setWrapStyleWord(true);
         JScrollPane observacionesScroll = new JScrollPane(observacionesArea);
 
+// Set a los Label
         layout.setHorizontalGroup(layout.createSequentialGroup()
             .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                 .addComponent(idLabel)
@@ -161,6 +162,7 @@ public class MedicinaGeneral extends JFrame {
         triagePanel.setBorder(BorderFactory.createTitledBorder("Orden de Prioridad - Triage"));
         triageTableModel = new DefaultTableModel(new String[]{"ID", "Prioridad"}, 0);
         triageTable = new JTable(triageTableModel);
+        // al seleccionar un paciente me muestre sus detalles en pantalla
         triageTable.getSelectionModel().addListSelectionListener(e -> mostrarDetallesPaciente());
         JScrollPane triageScrollPane = new JScrollPane(triageTable);
         triagePanel.add(triageScrollPane, BorderLayout.CENTER);
@@ -171,7 +173,7 @@ public class MedicinaGeneral extends JFrame {
         consultaPanel.setBorder(BorderFactory.createTitledBorder("Pacientes que vienen a consulta Consulta"));
         consultaTableModel = new DefaultTableModel(new String[]{"Documento", "Nombre", "Apellido"}, 0);
         consultaTable = new JTable(consultaTableModel);
-    //Traer datos del csv
+    //Traer datos del csv al presionar al paciente
         consultaTable.getSelectionModel().addListSelectionListener(e -> mostrarDetallesConsulta());
         JScrollPane consultaScrollPane = new JScrollPane(consultaTable);
         consultaPanel.add(consultaScrollPane, BorderLayout.CENTER);
@@ -721,7 +723,6 @@ private void mostrarVentanaHistorialClinico() {
         dialog.setVisible(true);
     }
 }
-
 
 // FIN HISTORIAL
 
